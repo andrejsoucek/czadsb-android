@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
+import org.jetbrains.anko.uiThread
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -66,6 +67,9 @@ class MapActivity : AppCompatActivity() {
                     planeMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     map.overlays.add(planeMarker)
                 }
+            }
+            uiThread {
+                map.invalidate()
             }
         }
     }
