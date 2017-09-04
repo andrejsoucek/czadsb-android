@@ -3,6 +3,7 @@ package cz.adsb.czadsb
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.support.v4.content.res.ResourcesCompat
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
 import org.jetbrains.anko.uiThread
@@ -57,14 +58,16 @@ class MapActivity : AppCompatActivity() {
         val east = map.boundingBox.lonEast
         doAsync {
             val aircraftList = PlanesFetcher.fetchAircrafts(north, south, west, east)
+            val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
             aircraftList.acList.forEach {
                 if (it.lat !== null && it.long !== null && it.amslAlt !== null && it.hdg !== null) {
                     val planeMarker = Marker(map)
                     val pos = GeoPoint(it.lat!!.toDouble(), it.long!!.toDouble(), it.amslAlt!!.toDouble())
+                    planeMarker.setIcon(airlinerIcon)
+                    planeMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     planeMarker.position = pos
                     planeMarker.rotation = it.hdg!!.toFloat()
                     planeMarker.title = it.callsign
-                    planeMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     map.overlays.add(planeMarker)
                 }
             }
