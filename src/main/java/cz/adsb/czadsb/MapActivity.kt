@@ -58,9 +58,9 @@ class MapActivity : AppCompatActivity() {
         doAsync {
             val aircraftList = PlanesFetcher.fetchAircrafts(north, south, west, east)
             aircraftList.acList.forEach {
-                if (it.lat !== null && it.long !== null && it.alt !== null && it.hdg !== null) {
+                if (it.lat !== null && it.long !== null && it.amslAlt !== null && it.hdg !== null) {
                     val planeMarker = Marker(map)
-                    val pos = GeoPoint(it.lat!!.toDouble(), it.long!!.toDouble(), it.alt!!.toDouble())
+                    val pos = GeoPoint(it.lat!!.toDouble(), it.long!!.toDouble(), it.amslAlt!!.toDouble())
                     planeMarker.position = pos
                     planeMarker.rotation = it.hdg!!.toFloat()
                     planeMarker.title = it.callsign
