@@ -1,4 +1,4 @@
-package cz.adsb.czadsb
+package cz.adsb.czadsb.utils
 
 import com.github.kittinunf.fuel.Fuel
 import cz.adsb.czadsb.model.AircraftList
@@ -15,14 +15,14 @@ object PlanesFetcher {
     }
 
     private fun fetchFull(north: Double, south: Double, west: Double, east: Double): AircraftList {
-        val (_, _, result) = Fuel.post("$URL?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
+        val (_, _, result) = Fuel.post("${URL}?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
             .responseObject(AircraftList.Deserializer())
         val (aircraftList, err) = result
         return aircraftList?: AircraftList()
     }
 
     private fun fetchChanges(ldv: String, north: Double, south: Double, west: Double, east: Double): AircraftList {
-        val (_, _, result) = Fuel.post("$URL?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
+        val (_, _, result) = Fuel.post("${URL}?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
                 .responseObject(AircraftList.Deserializer())
         val (aircraftList, err) = result
         return aircraftList?:AircraftList()
