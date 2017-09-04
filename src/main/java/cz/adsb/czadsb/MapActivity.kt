@@ -20,6 +20,7 @@ import kotlin.concurrent.timer
 class MapActivity : AppCompatActivity() {
 
     private var aircraftList: AircraftList = AircraftList()
+    private var aircraftMarkersMap: MutableMap<Number, Marker> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,24 +71,26 @@ class MapActivity : AppCompatActivity() {
         val west = map.boundingBox.lonWest
         val east = map.boundingBox.lonEast
         doAsync {
-            mOverlay.items.forEach {
-                mOverlay.remove(it)
-            }
             aircraftList = PlanesFetcher.fetchAircrafts(aircraftList, north, south, west, east)
             val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
             aircraftList.acList.forEach {
-                if (it.lat !== null && it.long !== null && it.amslAlt !== null && it.hdg !== null) {
-                    val aMarker = Marker(map)
-                    val pos = GeoPoint(it.lat!!.toDouble(), it.long!!.toDouble(), it.amslAlt!!.toDouble())
-                    aMarker.setIcon(airlinerIcon)
-                    aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    aMarker.position = pos
-                    aMarker.rotation = it.hdg!!.toFloat()
-                    aMarker.title = it.callsign
-                    aMarker.isDraggable = false
-                    mOverlay.add(aMarker)
+                if (it.willShowOnMap()) {
+                    if (aircraftMarkersMap.containsKey(it.id)) {
+                        aircraftMarkersMap[it.id]?.position = it.position
+                        aircraftMarkersMap[it.id]?.rotation = it.hdg!!.toFloat()
+                    } else {
+                        val aMarker = Marker(map)
+                        aMarker.setIcon(airlinerIcon)
+                        aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                        aMarker.position = it.position
+                        aMarker.rotation = it.hdg!!.toFloat()
+                        aMarker.title = it.callsign
+                        aMarker.isDraggable = false
+                        aircraftMarkersMap.put(it.id, aMarker)
+                    }
                 }
             }
+            aircraftMarkersMap.forEach { mOverlay.add(it.value) }
             uiThread {
                 map.invalidate()
             }

@@ -1,6 +1,7 @@
 package cz.adsb.czadsb.model
 
 import com.google.gson.annotations.SerializedName
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 
 data class Aircraft(
@@ -33,9 +34,9 @@ data class Aircraft(
     @SerializedName("Call")
     var callsign: String?,
     @SerializedName("Lat")
-    var lat: Float?,
+    var lat: Number?,
     @SerializedName("Long")
-    var long: Float?,
+    var long: Number?,
     @SerializedName("PosTime")
     var lastReported: Number?,
     @SerializedName("Mlat")
@@ -103,6 +104,11 @@ data class Aircraft(
     @SerializedName("Year")
     var manufactured: String?
 ) {
+    val position: GeoPoint?
+        get() = if (willShowOnMap()) GeoPoint(lat!!.toDouble(), long!!.toDouble(), amslAlt!!.toDouble()) else null
+
+    fun willShowOnMap(): Boolean = this.lat !== null && this.long !== null && this.amslAlt !== null && this.hdg !== null
+
     override fun equals(other: Any?): Boolean = other is Aircraft && this.id === other.id
     override fun hashCode(): Int = id.hashCode()
 }
