@@ -19,6 +19,17 @@ data class AircraftList(
     var stm: Number = 0
     ) {
 
+    val aircrafts: MutableMap<Number, Aircraft>
+        get() {
+            val map: MutableMap<Number, Aircraft> = mutableMapOf()
+            if (acList.isNotEmpty()) {
+                acList.forEach {
+                    map.put(it.id, it)
+                }
+            }
+            return map
+        }
+
     class Deserializer : ResponseDeserializable<AircraftList> {
         override fun deserialize(content: String) = Gson().fromJson(content, AircraftList::class.java)
     }

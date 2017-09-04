@@ -31,8 +31,8 @@ class MapActivity : AppCompatActivity() {
         val map = find<MapView>(R.id.map)
         configureMap(map)
 
-        val markersOverlay = createMarkersOverlay(map)
-        timer(null, false, 0, 5000, {initAirplanes(map, markersOverlay)})
+        val mOverlay = createMarkersOverlay(map)
+        timer(null, false, 0, 5000, {initAirplanes(map, mOverlay)})
     }
 
     override fun onResume() {
@@ -42,7 +42,7 @@ class MapActivity : AppCompatActivity() {
 
     private fun configureMap(map: MapView) {
         map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setBuiltInZoomControls(true)
+        map.setBuiltInZoomControls(false)
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
@@ -73,24 +73,30 @@ class MapActivity : AppCompatActivity() {
         doAsync {
             aircraftList = PlanesFetcher.fetchAircrafts(aircraftList, north, south, west, east)
             val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
-            aircraftList.acList.forEach {
-                if (it.willShowOnMap()) {
-                    if (aircraftMarkersMap.containsKey(it.id)) {
-                        aircraftMarkersMap[it.id]?.position = it.position
-                        aircraftMarkersMap[it.id]?.rotation = it.hdg!!.toFloat()
+            aircraftList.aircrafts.forEach {
+                if (it.value.willShowOnMap()) {
+                    if (aircraftMarkersMap.containsKey(it.value.id)) {
+                        aircraftMarkersMap[it.value.id]?.position = it.value.position
+                        aircraftMarkersMap[it.value.id]?.rotation = it.value.hdg!!.toFloat()
                     } else {
                         val aMarker = Marker(map)
                         aMarker.setIcon(airlinerIcon)
                         aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                        aMarker.position = it.position
-                        aMarker.rotation = it.hdg!!.toFloat()
-                        aMarker.title = it.callsign
+                        aMarker.position = it.value.position
+                        aMarker.rotation = it.value.hdg!!.toFloat()
+                        aMarker.title = it.value.callsign
                         aMarker.isDraggable = false
-                        aircraftMarkersMap.put(it.id, aMarker)
+                        aircraftMarkersMap.put(it.value.id, aMarker)
+                        mOverlay.add(aMarker)
                     }
                 }
             }
-            aircraftMarkersMap.forEach { mOverlay.add(it.value) }
+            val toDelete = aircraftMarkersMap.keys.minus(aircraftList.aircrafts.keys)
+            toDelete.forEach {
+                mOverlay.items.remove(aircraftMarkersMap[it])
+                aircraftMarkersMap.remove(it)
+            }
+
             uiThread {
                 map.invalidate()
             }
