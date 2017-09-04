@@ -6,28 +6,25 @@ import cz.adsb.czadsb.model.AircraftList
 object PlanesFetcher {
     private val URL = "https://czadsb.cz/public/AircraftList.json"
 
-    fun fetchAircrafts(north: Double, south: Double, west: Double, east: Double): AircraftList {
-        var aircraftList: AircraftList? = null
-        if (aircraftList?.lastDv != null) {
-            aircraftList = fetchChanges(aircraftList.lastDv, north, south, west, east)
-            return aircraftList!!
+    fun fetchAircrafts(aircraftList: AircraftList, north: Double, south: Double, west: Double, east: Double): AircraftList {
+        if (aircraftList.lastDv.equals(0)) {
+            return fetchFull(north, south, west, east)
         } else {
-            aircraftList = fetchFull(north, south, west, east)
-            return aircraftList!!
+            return fetchChanges(aircraftList.lastDv, north, south, west, east)
         }
     }
 
-    private fun fetchFull(north: Double, south: Double, west: Double, east: Double): AircraftList? {
+    private fun fetchFull(north: Double, south: Double, west: Double, east: Double): AircraftList {
         val (_, _, result) = Fuel.post("$URL?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
             .responseObject(AircraftList.Deserializer())
         val (aircraftList, err) = result
-        return aircraftList
+        return aircraftList?: AircraftList()
     }
 
-    private fun fetchChanges(ldv: String, north: Double, south: Double, west: Double, east: Double): AircraftList? {
+    private fun fetchChanges(ldv: String, north: Double, south: Double, west: Double, east: Double): AircraftList {
         val (_, _, result) = Fuel.post("$URL?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
                 .responseObject(AircraftList.Deserializer())
         val (aircraftList, err) = result
-        return aircraftList
+        return aircraftList?:AircraftList()
     }
 }

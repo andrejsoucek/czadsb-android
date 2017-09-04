@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v4.content.res.ResourcesCompat
+import cz.adsb.czadsb.model.AircraftList
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
 import org.jetbrains.anko.uiThread
@@ -13,9 +14,12 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
+import kotlin.concurrent.timer
 
 
 class MapActivity : AppCompatActivity() {
+
+    private var aircraftList: AircraftList = AircraftList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +31,7 @@ class MapActivity : AppCompatActivity() {
         configureMap(map)
 
         val markersOverlay = createMarkersOverlay(map)
-        initAirplanes(map, markersOverlay)
+        timer(null, false, 0, 5000, {initAirplanes(map, markersOverlay)})
     }
 
     override fun onResume() {
@@ -66,7 +70,10 @@ class MapActivity : AppCompatActivity() {
         val west = map.boundingBox.lonWest
         val east = map.boundingBox.lonEast
         doAsync {
-            val aircraftList = PlanesFetcher.fetchAircrafts(north, south, west, east)
+            mOverlay.items.forEach {
+                mOverlay.remove(it)
+            }
+            aircraftList = PlanesFetcher.fetchAircrafts(aircraftList, north, south, west, east)
             val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
             aircraftList.acList.forEach {
                 if (it.lat !== null && it.long !== null && it.amslAlt !== null && it.hdg !== null) {

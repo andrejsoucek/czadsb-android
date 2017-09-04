@@ -1,6 +1,7 @@
 package cz.adsb.czadsb.model
 
 import com.google.gson.annotations.SerializedName
+import org.osmdroid.views.overlay.Marker
 
 data class Aircraft(
     @SerializedName("Id")
@@ -101,4 +102,7 @@ data class Aircraft(
     var transponderType: Number?,
     @SerializedName("Year")
     var manufactured: String?
-)
+) {
+    override fun equals(other: Any?): Boolean = other is Aircraft && this.id === other.id
+    override fun hashCode(): Int = id.hashCode()
+}
