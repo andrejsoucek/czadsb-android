@@ -11,6 +11,7 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
 
 
@@ -24,7 +25,9 @@ class MapActivity : AppCompatActivity() {
 
         val map = find<MapView>(R.id.map)
         configureMap(map)
-        initAirplanes(map)
+
+        val markersOverlay = createMarkersOverlay(map)
+        initAirplanes(map, markersOverlay)
     }
 
     override fun onResume() {
@@ -43,15 +46,21 @@ class MapActivity : AppCompatActivity() {
         mapController.setCenter(startPoint)
     }
 
-    private fun initAirplanes(map: MapView) {
+    private fun createMarkersOverlay(map: MapView) : FolderOverlay {
+        val markersOverlay = FolderOverlay()
+        map.overlays.add(markersOverlay)
+        return markersOverlay
+    }
+
+    private fun initAirplanes(map: MapView, mOverlay: FolderOverlay) {
         if (map.getScreenRect(null).height() == 0) {
-            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAirplanesForView(map) }
+            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAirplanesForView(map, mOverlay) }
         } else {
-            loadAirplanesForView(map)
+            loadAirplanesForView(map, mOverlay)
         }
     }
 
-    private fun loadAirplanesForView(map: MapView) {
+    private fun loadAirplanesForView(map: MapView, mOverlay: FolderOverlay) {
         val north = map.boundingBox.latNorth
         val south = map.boundingBox.latSouth
         val west = map.boundingBox.lonWest
@@ -61,14 +70,15 @@ class MapActivity : AppCompatActivity() {
             val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
             aircraftList.acList.forEach {
                 if (it.lat !== null && it.long !== null && it.amslAlt !== null && it.hdg !== null) {
-                    val planeMarker = Marker(map)
+                    val aMarker = Marker(map)
                     val pos = GeoPoint(it.lat!!.toDouble(), it.long!!.toDouble(), it.amslAlt!!.toDouble())
-                    planeMarker.setIcon(airlinerIcon)
-                    planeMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    planeMarker.position = pos
-                    planeMarker.rotation = it.hdg!!.toFloat()
-                    planeMarker.title = it.callsign
-                    map.overlays.add(planeMarker)
+                    aMarker.setIcon(airlinerIcon)
+                    aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    aMarker.position = pos
+                    aMarker.rotation = it.hdg!!.toFloat()
+                    aMarker.title = it.callsign
+                    aMarker.isDraggable = false
+                    mOverlay.add(aMarker)
                 }
             }
             uiThread {
