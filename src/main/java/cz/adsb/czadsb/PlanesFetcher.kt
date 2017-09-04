@@ -7,7 +7,7 @@ object PlanesFetcher {
     private val URL = "https://czadsb.cz/public/AircraftList.json"
 
     fun fetchAircrafts(aircraftList: AircraftList, north: Double, south: Double, west: Double, east: Double): AircraftList {
-        if (aircraftList.lastDv.equals(0)) {
+        if (aircraftList.lastDv === "") {
             return fetchFull(north, south, west, east)
         } else {
             return fetchChanges(aircraftList.lastDv, north, south, west, east)
