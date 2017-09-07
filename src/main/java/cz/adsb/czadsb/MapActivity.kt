@@ -118,24 +118,13 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         val east = map.boundingBox.lonEast
         doAsync {
             aircraftList = PlanesFetcher.fetchAircrafts(aircraftList, north, south, west, east)
-            val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
             aircraftList.aircrafts.forEach {
                 if (it.value.willShowOnMap()) {
                     if (aircraftMarkersMap.containsKey(it.value.id)) {
                         aircraftMarkersMap[it.value.id]?.position = it.value.position
                         aircraftMarkersMap[it.value.id]?.rotation = it.value.hdg!!.toFloat()
                     } else {
-                        val aMarker = Marker(map)
-                        aMarker.setIcon(airlinerIcon)
-                        aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                        aMarker.position = it.value.position
-                        aMarker.rotation = it.value.hdg!!.toFloat()
-                        aMarker.title = it.value.callsign
-                        aMarker.isDraggable = false
-                        aMarker.setOnMarkerClickListener { marker, mapView ->
-                            mapView.controller.animateTo(marker.position)
-                            selectAircraft(it.value)
-                        }
+                        val aMarker = createAircraftMarker(map, it.value)
                         aircraftMarkersMap.put(it.value.id, aMarker)
                         mOverlay.add(aMarker)
                     }
@@ -151,6 +140,22 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                 map.invalidate()
             }
         }
+    }
+
+    private fun createAircraftMarker(map: MapView, aircraft: Aircraft) : Marker {
+        val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
+        val aMarker = Marker(map)
+        aMarker.setIcon(airlinerIcon)
+        aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        aMarker.position = aircraft.position
+        aMarker.rotation = aircraft.hdg!!.toFloat()
+        aMarker.title = aircraft.callsign
+        aMarker.isDraggable = false
+        aMarker.setOnMarkerClickListener { marker, mapView ->
+            mapView.controller.animateTo(marker.position)
+            selectAircraft(aircraft)
+        }
+        return aMarker
     }
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
