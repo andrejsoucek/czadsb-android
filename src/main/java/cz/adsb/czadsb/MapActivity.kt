@@ -49,7 +49,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
         val mOverlay = createMarkersOverlay(map)
         timer(null, false, 0, 5000, {
-            refreshAirplanes(map, mOverlay)
+            refreshAircrafts(map, mOverlay)
             refreshAircraftInfo()
         })
     }
@@ -78,11 +78,11 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         return markersOverlay
     }
 
-    private fun refreshAirplanes(map: MapView, mOverlay: FolderOverlay) {
+    private fun refreshAircrafts(map: MapView, mOverlay: FolderOverlay) {
         if (map.getScreenRect(null).height() == 0) {
-            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAirplanesForView(map, mOverlay) }
+            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAircraftsForView(map, mOverlay) }
         } else {
-            loadAirplanesForView(map, mOverlay)
+            loadAircraftsForView(map, mOverlay)
         }
     }
 
@@ -111,7 +111,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         }
     }
 
-    private fun loadAirplanesForView(map: MapView, mOverlay: FolderOverlay) {
+    private fun loadAircraftsForView(map: MapView, mOverlay: FolderOverlay) {
         val north = map.boundingBox.latNorth
         val south = map.boundingBox.latSouth
         val west = map.boundingBox.lonWest
