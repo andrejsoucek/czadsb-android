@@ -29,7 +29,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
     private var aircraftList: AircraftList = AircraftList()
     private var aircraftMarkersMap: MutableMap<Number, Marker> = mutableMapOf()
-    private var selectedAircraft: Aircraft? = null
+    private var selectedAircraftId: Number? = null
     private lateinit var bSheetBehavior: BottomSheetBehavior<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,9 +71,9 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         map.overlays.add(eventsOverlay)
 
         map.setOnTouchListener(View.OnTouchListener { v, event ->
-            if (selectedAircraft != null) {
+            if (selectedAircraftId != null) {
                 if (event.action == MotionEvent.ACTION_UP) {
-                    mapController.setCenter(aircraftMarkersMap[selectedAircraft!!.id]?.position)
+                    mapController.setCenter(aircraftMarkersMap[selectedAircraftId!!]?.position)
                     return@OnTouchListener false
                 }
             }
@@ -96,7 +96,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     }
 
     private fun selectAircraft(aircraft: Aircraft) : Boolean {
-        selectedAircraft = aircraft
+        selectedAircraftId = aircraft.id
         bSheetBehavior.collapse()
         fillStaticAircraftInfo(aircraft)
         refreshAircraftInfo()
@@ -113,16 +113,16 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     }
 
     private fun refreshAircraftInfo() {
-        if (selectedAircraft != null) {
-            val x = selectedAircraft!!.callsign
-            println("refreshing dynamic data for: $x")
+        if (selectedAircraftId != null) {
+            val x = selectedAircraftId!!
+            println("refreshing dynamic data for aircraft ID: $x")
             //TODO refresh dynamic data
         }
     }
 
     private fun centerMapOnSelectedAircraft(map: MapView) {
-        if (selectedAircraft != null) {
-            val selAcMarker = aircraftMarkersMap[selectedAircraft!!.id]
+        if (selectedAircraftId != null) {
+            val selAcMarker = aircraftMarkersMap[selectedAircraftId!!]
             if (selAcMarker != null) {
                 map.controller.animateTo(selAcMarker.position)
             }
@@ -159,7 +159,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             }
             val toDelete = aircraftMarkersMap.keys.minus(aircraftList.aircrafts.keys)
             toDelete.forEach {
-                if (it == selectedAircraft?.id) {
+                if (it == selectedAircraftId) {
                     return@forEach
                 }
                 val marker = aircraftMarkersMap[it]
@@ -198,8 +198,8 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     }
 
     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-        if (selectedAircraft != null) {
-            selectedAircraft = null
+        if (selectedAircraftId != null) {
+            selectedAircraftId = null
             bSheetBehavior.hide()
         }
         return false
