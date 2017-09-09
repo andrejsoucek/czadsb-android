@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.res.ResourcesCompat
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import cz.adsb.czadsb.model.Aircraft
@@ -48,6 +49,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         timer(null, false, 0, 5000, {
             refreshAircrafts(map, mOverlay)
             refreshAircraftInfo()
+            centerMapOnSelectedAircraft(map)
         })
     }
 
@@ -67,6 +69,16 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         mapController.setCenter(startPoint)
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(eventsOverlay)
+
+        map.setOnTouchListener(View.OnTouchListener { v, event ->
+            if (selectedAircraft != null) {
+                if (event.action == MotionEvent.ACTION_UP) {
+                    mapController.setCenter(aircraftMarkersMap[selectedAircraft!!.id]?.position)
+                    return@OnTouchListener false
+                }
+            }
+            false
+        })
     }
 
     private fun createMarkersOverlay(map: MapView) : FolderOverlay {
@@ -108,6 +120,15 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         }
     }
 
+    private fun centerMapOnSelectedAircraft(map: MapView) {
+        if (selectedAircraft != null) {
+            val selAcMarker = aircraftMarkersMap[selectedAircraft!!.id]
+            if (selAcMarker != null) {
+                map.controller.animateTo(selAcMarker.position)
+            }
+        }
+    }
+
     private fun loadAircraftsForView(map: MapView, mOverlay: FolderOverlay) {
         val north = map.boundingBox.latNorth
         val south = map.boundingBox.latSouth
@@ -138,6 +159,9 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             }
             val toDelete = aircraftMarkersMap.keys.minus(aircraftList.aircrafts.keys)
             toDelete.forEach {
+                if (it == selectedAircraft?.id) {
+                    return@forEach
+                }
                 val marker = aircraftMarkersMap[it]
                 mOverlay.items.remove(marker)
                 aircraftMarkersMap.remove(it)
