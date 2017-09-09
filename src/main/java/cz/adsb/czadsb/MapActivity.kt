@@ -96,7 +96,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         find<TextView>(R.id.operator).text = aircraft.operator
         find<TextView>(R.id.from).text = aircraft.from?.firstChars(3) ?: "N/A"
         find<TextView>(R.id.to).text = aircraft.to?.firstChars(3) ?: "N/A"
-        find<TextView>(R.id.ac_type).text = aircraft.manufacturer + " " + aircraft.type
+        find<TextView>(R.id.ac_type).text = aircraft.manufacturer?.concatenate(aircraft.type, " ") ?: "N/A"
         find<TextView>(R.id.registration).text = aircraft.registration ?: "Reg. N/A"
     }
 
