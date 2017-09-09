@@ -1,5 +1,7 @@
 package cz.adsb.czadsb
 
+import android.content.Context
+import android.location.LocationManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -64,9 +66,10 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
-        mapController.setZoom(9)
-        val startPoint = GeoPoint(50.0755381, 14.4378005)
+        val startPoint = getStartPoint()
         mapController.setCenter(startPoint)
+        mapController.setZoom(9)
+
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(eventsOverlay)
 
@@ -79,6 +82,16 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             }
             false
         })
+    }
+
+    private fun getStartPoint() : GeoPoint {
+        val locationManger: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val lastLoc = locationManger.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        return if (lastLoc != null) {
+            GeoPoint(lastLoc.latitude, lastLoc.longitude)
+        } else {
+            GeoPoint(50.0755381, 14.4378005)
+        }
     }
 
     private fun createMarkersOverlay(map: MapView) : FolderOverlay {
