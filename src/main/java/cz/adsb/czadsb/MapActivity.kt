@@ -9,10 +9,7 @@ import android.view.View
 import android.widget.TextView
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
-import cz.adsb.czadsb.utils.PlanesFetcher
-import cz.adsb.czadsb.utils.collapse
-import cz.adsb.czadsb.utils.firstChars
-import cz.adsb.czadsb.utils.hide
+import cz.adsb.czadsb.utils.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
 import org.jetbrains.anko.uiThread
@@ -119,21 +116,34 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         doAsync {
             aircraftList = PlanesFetcher.fetchAircrafts(aircraftList, north, south, west, east)
             aircraftList.aircrafts.forEach {
-                if (it.value.willShowOnMap()) {
-                    if (aircraftMarkersMap.containsKey(it.value.id)) {
-                        aircraftMarkersMap[it.value.id]?.position = it.value.position
-                        aircraftMarkersMap[it.value.id]?.rotation = it.value.hdg!!.toFloat()
+                val aircraft = it.value
+                if (aircraft.willShowOnMap()) {
+                    if (aircraftMarkersMap.containsKey(aircraft.id)) {
+                        aircraftMarkersMap[aircraft.id]?.position = aircraft.position
+                        aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg!!.toFloat()
+                        uiThread {
+                            // UGLY but working
+                            aircraftMarkersMap[aircraft.id]?.closeInfoWindow()
+                            aircraftMarkersMap[aircraft.id]?.showInfoWindow()
+                        }
                     } else {
-                        val aMarker = createAircraftMarker(map, it.value)
-                        aircraftMarkersMap.put(it.value.id, aMarker)
+                        val aMarker = createAircraftMarker(map, aircraft)
+                        aircraftMarkersMap.put(aircraft.id, aMarker)
                         mOverlay.add(aMarker)
+                        uiThread {
+                            aMarker.showInfoWindow()
+                        }
                     }
                 }
             }
             val toDelete = aircraftMarkersMap.keys.minus(aircraftList.aircrafts.keys)
             toDelete.forEach {
-                mOverlay.items.remove(aircraftMarkersMap[it])
+                val marker = aircraftMarkersMap[it]
+                mOverlay.items.remove(marker)
                 aircraftMarkersMap.remove(it)
+                uiThread {
+                    marker?.closeInfoWindow()
+                }
             }
 
             uiThread {
@@ -151,6 +161,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         aMarker.rotation = aircraft.hdg!!.toFloat()
         aMarker.title = aircraft.callsign
         aMarker.isDraggable = false
+        aMarker.infoWindow = CallsignLabel(R.layout.callsign_label, map)
         aMarker.setOnMarkerClickListener { marker, mapView ->
             mapView.controller.animateTo(marker.position)
             selectAircraft(aircraft)
