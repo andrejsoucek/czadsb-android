@@ -40,8 +40,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_map)
 
-        val bSheet = find<View>(R.id.bottom_sheet)
-        bSheetBehavior = BottomSheetBehavior.from(bSheet)
+        bSheetBehavior = configureBottomSheet()
         bSheetBehavior.hide()
 
         val map = find<MapView>(R.id.map)
@@ -58,6 +57,22 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     override fun onResume() {
         super.onResume()
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+    }
+
+    private fun configureBottomSheet() : BottomSheetBehavior<View> {
+        val bSheet = find<View>(R.id.bottom_sheet)
+        bSheetBehavior = BottomSheetBehavior.from(bSheet)
+        bSheetBehavior.setBottomSheetCallback(object:BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    selectedAircraftId = null
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+        })
+        return bSheetBehavior
     }
 
     private fun configureMap(map: MapView) {
