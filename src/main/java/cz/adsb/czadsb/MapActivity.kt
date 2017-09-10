@@ -9,6 +9,8 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.res.ResourcesCompat
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
@@ -24,7 +26,9 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import java.util.*
 import kotlin.concurrent.timer
+import kotlin.concurrent.timerTask
 
 
 class MapActivity : AppCompatActivity(), MapEventsReceiver {
@@ -40,11 +44,10 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_map)
 
-        bSheetBehavior = configureBottomSheet()
-        bSheetBehavior.hide()
-
         val map = find<MapView>(R.id.map)
         configureMap(map)
+        bSheetBehavior = configureBottomSheet(map)
+        bSheetBehavior.hide()
 
         val mOverlay = createMarkersOverlay(map)
         timer(null, false, 0, 5000, {
@@ -59,14 +62,24 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
     }
 
-    private fun configureBottomSheet() : BottomSheetBehavior<View> {
+    private fun configureBottomSheet(map: MapView) : BottomSheetBehavior<View> {
         val bSheet = find<View>(R.id.bottom_sheet)
         bSheetBehavior = BottomSheetBehavior.from(bSheet)
         bSheetBehavior.setBottomSheetCallback(object:BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    selectedAircraftId = null
+                when (newState) {
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        map.layoutParams.height = map.height - find<LinearLayout>(R.id.bottom_sheet).height
+                    }
+                    BottomSheetBehavior.STATE_HIDDEN ->
+                        selectedAircraftId = null
                 }
+                map.requestLayout()
+                //centering needs to be delayed
+                Timer().schedule(timerTask {centerMapOnSelectedAircraft(map)}, 50)
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
