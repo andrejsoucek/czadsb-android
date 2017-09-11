@@ -182,7 +182,10 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                 if (aircraft.willShowOnMap()) {
                     if (aircraftMarkersMap.containsKey(aircraft.id)) {
                         aircraftMarkersMap[aircraft.id]?.position = aircraft.position
-                        aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg!!.toFloat()
+                        // do not rotate balloon icon
+                        if (aircraft.type != "BALL") {
+                            aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg!!.toFloat()
+                        }
                         uiThread {
                             // UGLY but working
                             aircraftMarkersMap[aircraft.id]?.closeInfoWindow()
@@ -218,12 +221,15 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     }
 
     private fun createAircraftMarker(map: MapView, aircraft: Aircraft) : Marker {
-        val airlinerIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_airliner_icon, null)
+        val airlinerIcon = ResourcesCompat.getDrawable(resources, getDrawableIdByName(aircraft.iconName), null)
         val aMarker = Marker(map)
         aMarker.setIcon(airlinerIcon)
         aMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         aMarker.position = aircraft.position
-        aMarker.rotation = aircraft.hdg!!.toFloat()
+        // do not rotate balloon icon
+        if (aircraft.type != "BALL") {
+            aMarker.rotation = aircraft.hdg!!.toFloat()
+        }
         aMarker.title = aircraft.callsign
         aMarker.isDraggable = false
         aMarker.infoWindow = CallsignLabel(R.layout.callsign_label, map)
@@ -232,6 +238,14 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             selectAircraft(aircraft)
         }
         return aMarker
+    }
+
+    private fun getDrawableIdByName(resName: String) : Int {
+        return try {
+            resources.getIdentifier(resName, "drawable", packageName)
+        } catch (e: Exception) {
+            R.drawable.ic_airliner_icon
+        }
     }
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
