@@ -1,5 +1,6 @@
 package cz.adsb.czadsb.utils
 
+import android.view.View
 import android.widget.TextView
 import cz.adsb.czadsb.R
 import org.jetbrains.anko.find
@@ -14,7 +15,11 @@ class AircraftLabel(layoutResId: Int,
 
     override fun onOpen(item: Any?) {
         mView.find<TextView>(R.id.reg_label_tv).text = registration
-        mView.find<TextView>(R.id.callsign_label_tv).text = callsign
+        if (callsign != null) {
+            mView.find<TextView>(R.id.callsign_label_tv).text = callsign
+        } else {
+            mView.find<TextView>(R.id.callsign_label_tv).visibility = View.GONE
+        }
     }
 
     override fun onClose() {
