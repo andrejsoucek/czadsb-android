@@ -7,12 +7,14 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.OverlayWithIW
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
-class CallsignLabel(layoutResId: Int, mapView: MapView?) : InfoWindow(layoutResId, mapView) {
+class AircraftLabel(layoutResId: Int,
+                    mapView: MapView?,
+                    private val callsign: String?,
+                    private val registration: String?) : InfoWindow(layoutResId, mapView) {
 
     override fun onOpen(item: Any?) {
-        val marker = item as OverlayWithIW
-        val title = marker.title
-        mView.find<TextView>(R.id.callsign_label_tv).text = title
+        mView.find<TextView>(R.id.reg_label_tv).text = registration
+        mView.find<TextView>(R.id.callsign_label_tv).text = callsign
     }
 
     override fun onClose() {

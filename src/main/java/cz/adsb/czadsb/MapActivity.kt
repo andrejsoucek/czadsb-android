@@ -230,9 +230,8 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         if (aircraft.type != "BALL") {
             aMarker.rotation = aircraft.hdg!!.toFloat()
         }
-        aMarker.title = aircraft.callsign
         aMarker.isDraggable = false
-        aMarker.infoWindow = CallsignLabel(R.layout.callsign_label, map)
+        aMarker.infoWindow = AircraftLabel(R.layout.aircraft_label, map, aircraft.callsign, aircraft.registration)
         aMarker.setOnMarkerClickListener { marker, mapView ->
             mapView.controller.animateTo(marker.position)
             selectAircraft(aircraft)
