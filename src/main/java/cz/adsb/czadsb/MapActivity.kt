@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.github.clans.fab.FloatingActionMenu
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
 import cz.adsb.czadsb.utils.*
@@ -69,13 +70,21 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_COLLAPSED -> {
+                        val fMenu = find<FloatingActionMenu>(R.id.floating_action_menu)
+                        fMenu.visibility = View.GONE
+                        fMenu.close(false)
                         map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                     }
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        map.layoutParams.height = map.height - find<LinearLayout>(R.id.bottom_sheet).height
+                        if (map.layoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                            map.layoutParams.height = map.height - find<LinearLayout>(R.id.bottom_sheet).height
+                        }
                     }
-                    BottomSheetBehavior.STATE_HIDDEN ->
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        find<FloatingActionMenu>(R.id.floating_action_menu).visibility = View.VISIBLE
                         selectedAircraftId = null
+                        map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    }
                 }
                 map.requestLayout()
                 //centering needs to be delayed
