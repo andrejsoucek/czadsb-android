@@ -8,25 +8,39 @@ object PlanesFetcher {
 
     fun fetchAircrafts(ctx: Context, aircraftList: AircraftList, north: Double, south: Double, west: Double, east: Double): AircraftList {
         return if (aircraftList.lastDv === "") {
-            fetchFull(resolveUrl(ctx), north, south, west, east)
+            fetchFull(ctx, north, south, west, east)
         } else {
-            fetchChanges(resolveUrl(ctx), aircraftList.lastDv, north, south, west, east)
+            fetchChanges(ctx, aircraftList.lastDv, north, south, west, east)
         }
     }
 
-    private fun fetchFull(url: String, north: Double, south: Double, west: Double, east: Double): AircraftList {
-        val (_, _, result) = Fuel.post("$url?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
-            .responseObject(AircraftList.Deserializer())
+    private fun fetchFull(ctx: Context, north: Double, south: Double, west: Double, east: Double): AircraftList {
+        val request = Fuel.post("${resolveUrl(ctx)}?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
+        if (UserManager.isUserLoggedIn(ctx)) {
+            val user = UserManager.getUser(ctx)
+            request.authenticate(user.name, user.pass)
+        }
+        val (_, _, result) = request.responseObject(AircraftList.Deserializer())
         val (aircraftList, _) = result
         return aircraftList?: AircraftList()
     }
 
-    private fun fetchChanges(url: String, ldv: String, north: Double, south: Double, west: Double, east: Double): AircraftList {
-        val (_, _, result) = Fuel.post("$url?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
-                .responseObject(AircraftList.Deserializer())
+    private fun fetchChanges(ctx: Context, ldv: String, north: Double, south: Double, west: Double, east: Double): AircraftList {
+        val request = Fuel.post("${resolveUrl(ctx)}?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
+        if (UserManager.isUserLoggedIn(ctx)) {
+            val user = UserManager.getUser(ctx)
+            request.authenticate(user.name, user.pass)
+        }
+        val (_, _, result) = request.responseObject(AircraftList.Deserializer())
         val (aircraftList, _) = result
         return aircraftList?: AircraftList()
     }
 
-    private fun resolveUrl(ctx: Context): String = ctx.getProperty("url_public")
+    private fun resolveUrl(ctx: Context): String {
+        return if (UserManager.isUserLoggedIn(ctx)) {
+            ctx.getProperty("url_private")
+        } else {
+            ctx.getProperty("url_public")
+        }
+    }
 }
