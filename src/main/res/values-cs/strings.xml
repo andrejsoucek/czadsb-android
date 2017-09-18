@@ -3,4 +3,7 @@
     <string name="Login">Přihlášení</string>
     <string name="Filters">Filtry</string>
     <string name="Preferences">Přizpůsobení</string>
+    <string name="username">Jméno</string>
+    <string name="password">Heslo</string>
+    <string name="show_password">Zobrazit heslo</string>
 </resources>

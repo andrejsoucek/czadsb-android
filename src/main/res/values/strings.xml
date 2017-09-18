@@ -3,4 +3,7 @@
     <string name="Login">Login</string>
     <string name="Filters">Filters</string>
     <string name="Preferences">Preferences</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="show_password">Show password</string>
 </resources>
