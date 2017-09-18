@@ -7,17 +7,22 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.res.ResourcesCompat
+import android.support.v7.app.AlertDialog
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
+import cz.adsb.czadsb.model.User
 import cz.adsb.czadsb.utils.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
+import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -47,8 +52,11 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
         val map = find<MapView>(R.id.map)
         configureMap(map)
+
         bSheetBehavior = configureBottomSheet(map)
         bSheetBehavior.hide()
+
+        configureActionMenu()
 
         val mOverlay = createMarkersOverlay(map)
         timer(null, false, 0, 5000, {
@@ -61,6 +69,45 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     override fun onResume() {
         super.onResume()
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+    }
+
+    private fun showLoginDialog() {
+        val alert = AlertDialog.Builder(this)
+        val layout = layoutInflater.inflate(R.layout.login_dialog, null)
+        alert.setTitle(R.string.Login)
+        alert.setView(layout)
+        alert.setCancelable(true)
+        alert.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+        alert.setPositiveButton(R.string.Login) { dialog, _ ->
+            val user = User(layout.find<EditText>(R.id.et_username).text.toString(), layout.find<EditText>(R.id.et_password).text.toString())
+            doAsync {
+                try {
+                    UserManager.login(applicationContext, user)
+                } catch (e: Exception) {
+                    uiThread { toast("error") } //TODO
+                }
+                uiThread { dialog.cancel() } //TODO
+            }
+        }
+        alert.create().show()
+    }
+
+    private fun configureActionMenu() {
+        val loginBtn = find<FloatingActionButton>(R.id.login_button)
+        val filtersBtn = find<FloatingActionButton>(R.id.filters_button)
+        val preferencesBtn = find<FloatingActionButton>(R.id.preferences_button)
+
+        loginBtn.setOnClickListener {
+            showLoginDialog()
+        }
+        filtersBtn.setOnClickListener {
+            //TODO
+        }
+        preferencesBtn.setOnClickListener {
+            //TODO
+        }
     }
 
     private fun configureBottomSheet(map: MapView) : BottomSheetBehavior<View> {

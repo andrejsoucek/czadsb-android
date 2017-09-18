@@ -6,4 +6,5 @@
     <string name="username">Jméno</string>
     <string name="password">Heslo</string>
     <string name="show_password">Zobrazit heslo</string>
+    <string name="cancel">Zrušit</string>
 </resources>

@@ -34,7 +34,7 @@ xmlns:fab="http://schemas.android.com/apk/res-auto"
     fab:menu_showShadow="false">
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/material_design_floating_action_menu_item1"
+        android:id="@+id/login_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_login_white_24dp"
@@ -42,7 +42,7 @@ xmlns:fab="http://schemas.android.com/apk/res-auto"
         fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/material_design_floating_action_menu_item2"
+        android:id="@+id/filters_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_filter_list_white_24dp"
@@ -50,7 +50,7 @@ xmlns:fab="http://schemas.android.com/apk/res-auto"
         fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/material_design_floating_action_menu_item3"
+        android:id="@+id/preferences_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_preferences_white_24dp"
