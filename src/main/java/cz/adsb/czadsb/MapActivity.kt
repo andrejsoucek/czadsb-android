@@ -185,7 +185,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         val west = map.boundingBox.lonWest
         val east = map.boundingBox.lonEast
         doAsync {
-            aircraftList = PlanesFetcher.fetchAircrafts(aircraftList, north, south, west, east)
+            aircraftList = PlanesFetcher.fetchAircrafts(applicationContext, aircraftList, north, south, west, east)
             aircraftList.aircrafts.forEach {
                 val aircraft = it.value
                 if (aircraft.willShowOnMap()) {

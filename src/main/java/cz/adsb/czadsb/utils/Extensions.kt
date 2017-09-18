@@ -1,7 +1,17 @@
 package cz.adsb.czadsb.utils
 
+import android.content.Context
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
+import java.util.*
+
+
+/****** Properties *********/
+fun Context.getProperty(key: String): String {
+    val p = Properties()
+    p.load(this.assets.open("config.properties"))
+    return p.getProperty(key)
+}
 
 /****** String fns *********/
 /**
