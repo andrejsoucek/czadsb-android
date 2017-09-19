@@ -30,6 +30,13 @@ object UserManager {
         }
     }
 
+    fun logout(ctx: Context) {
+        val editor = ctx.getSharedPreferences(PREFS_ACCOUNT, Context.MODE_PRIVATE).edit()
+        editor.putString(PREFS_ACCOUNT_NAME, USER_NOT_LOGGED_IN)
+        editor.putString(PREFS_ACCOUNT_PASSWORD, "")
+        editor.apply()
+    }
+
     fun isUserLoggedIn(ctx: Context): Boolean = getUser(ctx).name != USER_NOT_LOGGED_IN
 
     fun getUser(ctx: Context): User {

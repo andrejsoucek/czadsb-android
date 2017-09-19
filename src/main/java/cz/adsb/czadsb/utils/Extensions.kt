@@ -3,10 +3,18 @@ package cz.adsb.czadsb.utils
 import android.content.Context
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
+import cz.adsb.czadsb.R
 import java.util.*
 
+/****** Context *********/
+fun Context.getDrawableIdByName(resName: String) : Int {
+    return try {
+        this.resources.getIdentifier(resName, "drawable", packageName)
+    } catch (e: Exception) {
+        R.drawable.ic_airliner_icon
+    }
+}
 
-/****** Properties *********/
 fun Context.getProperty(key: String): String {
     val p = Properties()
     p.load(this.assets.open("config.properties"))

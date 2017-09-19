@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">CZ ADSB</string>
     <string name="Login">Přihlášení</string>
+    <string name="Logout">Odhlásit</string>
     <string name="Filters">Filtry</string>
     <string name="Preferences">Přizpůsobení</string>
     <string name="username">Jméno</string>
     <string name="password">Heslo</string>
     <string name="show_password">Zobrazit heslo</string>
     <string name="cancel">Zrušit</string>
+    <string name="login_successful">Přihlášení proběhlo úspěšně.</string>
+    <string name="unexpected_error_while_logging_in">Neočekávaná chyba při přihlašování.</string>
+    <string name="you_have_been_logged_out">Byl jste odhlášen.</string>
 </resources>
