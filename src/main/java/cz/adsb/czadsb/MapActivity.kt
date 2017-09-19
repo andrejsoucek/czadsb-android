@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomSheetBehavior
-import android.support.v4.content.res.ResourcesCompat
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -276,6 +275,9 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         if (selectedAircraftId != null) {
             selectedAircraftId = null
             bSheetBehavior.hide()
+        }
+        if (actionMenu.isOpened) {
+            actionMenu.close(true)
         }
         return false
     }
