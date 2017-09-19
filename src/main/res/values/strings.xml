@@ -11,4 +11,8 @@
     <string name="login_successful">Login successful.</string>
     <string name="unexpected_error_while_logging_in">Unexpected error while logging in.</string>
     <string name="you_have_been_logged_out">You have been logged out.</string>
+    <string name="name_or_password_wrong">Incorrect name or password.</string>
+    <string name="could_not_login_client_error">Login failure - client error.</string>
+    <string name="could_not_login_server_redirection_error">Login failure - redirection error.</string>
+    <string name="could_not_login_server_error">Login failure - server error.</string>
 </resources>

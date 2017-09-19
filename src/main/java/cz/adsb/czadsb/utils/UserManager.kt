@@ -18,6 +18,7 @@ object UserManager {
     fun login(ctx: Context, user: User): Boolean {
         val (_, response, _) = Fuel.get(ctx.getProperty("login_check"))
                 .authenticate(user.name, user.pass)
+                .timeout(5000)
                 .response()
         val sc = response.httpStatusCode
         return when (sc) {

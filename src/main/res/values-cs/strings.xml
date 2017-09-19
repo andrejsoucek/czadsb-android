@@ -11,4 +11,8 @@
     <string name="login_successful">Přihlášení proběhlo úspěšně.</string>
     <string name="unexpected_error_while_logging_in">Neočekávaná chyba při přihlašování.</string>
     <string name="you_have_been_logged_out">Byl jste odhlášen.</string>
+    <string name="name_or_password_wrong">Nesprávné uživatelské jméno nebo heslo.</string>
+    <string name="could_not_login_client_error">Přihlášení se nezdařilo - chyba klienta.</string>
+    <string name="could_not_login_server_redirection_error">Přihlášení se nezdařilo - chyba přesměrování.</string>
+    <string name="could_not_login_server_error">Přihlášení se nezdařilo - chyba serveru.</string>
 </resources>
