@@ -19,4 +19,5 @@
     <string name="speed">Rychlost:</string>
     <string name="heading">Kurz:</string>
     <string name="squawk">Kód odpovídače:</string>
+    <string name="unknown_aircraft">Neznámý typ letounu</string>
 </resources>

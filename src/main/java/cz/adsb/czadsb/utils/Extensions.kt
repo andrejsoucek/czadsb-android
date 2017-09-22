@@ -47,6 +47,27 @@ fun String?.concatenate(add: String?, separator: String = ""): String? {
     }
 }
 
+fun Number?.toAltitude() : String {
+    if (this == null) {
+        return "N/A"
+    }
+    return this.toString() + " ft"
+}
+
+fun Number?.toHeading() : String {
+    if (this == null) {
+        return "N/A"
+    }
+    return this.toString() + "°"
+}
+
+fun Number?.toSpeed() : String {
+    if (this == null) {
+        return "N/A"
+    }
+    return this.toString() + " km/h"
+}
+
 /****** Bottom sheet states *********/
 fun BottomSheetBehavior<View>.hide() {
     this.state = BottomSheetBehavior.STATE_HIDDEN

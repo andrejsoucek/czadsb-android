@@ -61,7 +61,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         val mOverlay = OverlayFactory.createMarkersOverlay(map)
         timer(null, false, 0, 5000, {
             refreshAircrafts(map, mOverlay)
-            refreshAircraftInfo()
+            runOnUiThread { refreshAircraftInfo() }
             centerMapOnSelectedAircraft(map)
         })
     }
@@ -91,26 +91,39 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
     private fun selectAircraft(aircraft: Aircraft) : Boolean {
         selectedAircraftId = aircraft.id
-        bSheetBehavior.collapse()
+        if (bSheetBehavior.isHidden()) {
+            bSheetBehavior.collapse()
+        }
         fillStaticAircraftInfo(aircraft)
         refreshAircraftInfo()
         return true
     }
 
     private fun fillStaticAircraftInfo(aircraft:Aircraft) {
+        // peeking
         find<TextView>(R.id.callsign).text = aircraft.callsign
         find<TextView>(R.id.operator).text = aircraft.operator
         find<TextView>(R.id.from).text = aircraft.from?.firstChars(3) ?: "N/A"
         find<TextView>(R.id.to).text = aircraft.to?.firstChars(3) ?: "N/A"
         find<TextView>(R.id.ac_type).text = aircraft.manufacturer?.concatenate(aircraft.type, " ") ?: "N/A"
         find<TextView>(R.id.registration).text = aircraft.registration ?: "Reg. N/A"
+        // expanded
+        find<TextView>(R.id.manufacturerTV).text = aircraft.manufacturer ?: getString(R.string.unknown_aircraft)
+        find<TextView>(R.id.icaoTV).text = aircraft.icao ?: "N/A"
     }
 
     private fun refreshAircraftInfo() {
         if (selectedAircraftId != null) {
-            val x = selectedAircraftId!!
-            println("refreshing dynamic data for aircraft ID: $x")
-            //TODO refresh dynamic data
+            val aircraft = aircraftList.aircrafts[selectedAircraftId!!]
+            val altTv = find<TextView>(R.id.altTV)
+            if (aircraft?.onGround == true) {
+                altTv.text = "GND"
+            } else {
+                altTv.text = aircraft?.amslAlt.toAltitude()
+            }
+            find<TextView>(R.id.speedTV).text = aircraft?.spd.toSpeed()
+            find<TextView>(R.id.headingTV).text = aircraft?.hdg.toHeading()
+            find<TextView>(R.id.squawkTV).text = aircraft?.squawk ?: "N/A"
         }
     }
 
