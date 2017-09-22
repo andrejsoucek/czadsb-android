@@ -15,4 +15,8 @@
     <string name="could_not_login_client_error">Login failure - client error.</string>
     <string name="could_not_login_server_redirection_error">Login failure - redirection error.</string>
     <string name="could_not_login_server_error">Login failure - server error.</string>
+    <string name="altitude">Altitude:</string>
+    <string name="speed">Speed:</string>
+    <string name="heading">Heading:</string>
+    <string name="squawk">Squawk:</string>
 </resources>
