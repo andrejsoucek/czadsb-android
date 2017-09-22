@@ -59,7 +59,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
 
         val mOverlay = OverlayFactory.createMarkersOverlay(map)
-        timer(null, false, 0, 5000, {
+        timer(null, false, 0, getRefreshRate(), {
             refreshAircrafts(map, mOverlay)
             runOnUiThread { refreshAircraftInfo() }
             centerMapOnSelectedAircraft(map)
@@ -187,6 +187,14 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             uiThread {
                 map.invalidate()
             }
+        }
+    }
+
+    private fun getRefreshRate() : Long {
+        return if (UserManager.isUserLoggedIn(applicationContext)) {
+            getProperty("refresh_rate_private").toLong()
+        } else {
+            getProperty("refresh_rate_public").toLong()
         }
     }
 
