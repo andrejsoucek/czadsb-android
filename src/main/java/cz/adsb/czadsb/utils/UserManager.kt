@@ -15,12 +15,12 @@ object UserManager {
     private val PREFS_ACCOUNT_PASSWORD = "pass"
     private val USER_NOT_LOGGED_IN = "x_no_user"
 
-    fun login(ctx: Context, user: User): Boolean {
+    fun login(ctx: Context, user: User): Boolean
+    {
         val (_, response, _) = Fuel.get(ctx.getProperty("login_check"))
-                .authenticate(user.name, user.pass)
                 .timeout(5000)
                 .response()
-        val sc = response.httpStatusCode
+        val sc = response.statusCode
         return when (sc) {
             in 200..299 -> {saveUser(ctx, user); true}
             in 300..399 -> throw RedirectionException("Redirection error, status code: $sc")
@@ -31,7 +31,8 @@ object UserManager {
         }
     }
 
-    fun logout(ctx: Context) {
+    fun logout(ctx: Context)
+    {
         val editor = ctx.getSharedPreferences(PREFS_ACCOUNT, Context.MODE_PRIVATE).edit()
         editor.putString(PREFS_ACCOUNT_NAME, USER_NOT_LOGGED_IN)
         editor.putString(PREFS_ACCOUNT_PASSWORD, "")
@@ -40,12 +41,14 @@ object UserManager {
 
     fun isUserLoggedIn(ctx: Context): Boolean = getUser(ctx).name != USER_NOT_LOGGED_IN
 
-    fun getUser(ctx: Context): User {
+    fun getUser(ctx: Context): User
+    {
         val prefs = ctx.getSharedPreferences(PREFS_ACCOUNT, Context.MODE_PRIVATE)
-        return User(prefs.getString(PREFS_ACCOUNT_NAME, USER_NOT_LOGGED_IN), prefs.getString(PREFS_ACCOUNT_PASSWORD, ""))
+        return User(prefs.getString(PREFS_ACCOUNT_NAME, USER_NOT_LOGGED_IN)!!, prefs.getString(PREFS_ACCOUNT_PASSWORD, "empty")!!)
     }
 
-    private fun saveUser(ctx: Context, user: User) {
+    private fun saveUser(ctx: Context, user: User)
+    {
         val editor = ctx.getSharedPreferences(PREFS_ACCOUNT, Context.MODE_PRIVATE).edit()
         editor.putString(PREFS_ACCOUNT_NAME, user.name)
         editor.putString(PREFS_ACCOUNT_PASSWORD, user.pass)

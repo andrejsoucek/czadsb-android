@@ -1,10 +1,10 @@
 package cz.adsb.czadsb.factories
 
 import android.content.Context
-import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import cz.adsb.czadsb.R
 import cz.adsb.czadsb.exceptions.ClientErrorException
 import cz.adsb.czadsb.exceptions.InvalidCredentialsException
@@ -12,10 +12,11 @@ import cz.adsb.czadsb.exceptions.RedirectionException
 import cz.adsb.czadsb.exceptions.ServerErrorException
 import cz.adsb.czadsb.model.User
 import cz.adsb.czadsb.utils.UserManager
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.find
-import org.jetbrains.anko.toast
-import org.jetbrains.anko.uiThread
+import kotlinx.android.synthetic.main.login_dialog.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object DialogFactory {
 
@@ -30,9 +31,9 @@ object DialogFactory {
             dialog.cancel()
         }
         alert.setPositiveButton(R.string.Login) { dialog, _ ->
-            val user = User(layout.find<EditText>(R.id.et_username).text.toString(), layout.find<EditText>(R.id.et_password).text.toString())
+            val user = User(layout.et_username.text.toString(), layout.et_password.text.toString())
             var loginTextResource: Int
-            doAsync {
+            GlobalScope.launch {
                 try {
                     val login = UserManager.login(parentView.context.applicationContext, user)
                     loginTextResource = if (login) {
@@ -51,9 +52,9 @@ object DialogFactory {
                 } catch (e: Exception) {
                     loginTextResource = R.string.unexpected_error_while_logging_in
                 }
-                uiThread {
+                withContext (Dispatchers.Main) {
                     dialog.cancel()
-                    parentView.context.toast(loginTextResource)
+                    Toast.makeText(parentView.context.applicationContext, loginTextResource, Toast.LENGTH_SHORT).show()
                 } //TODO
             }
         }

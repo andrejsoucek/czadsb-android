@@ -1,6 +1,6 @@
 package cz.adsb.czadsb.factories
 
-import android.support.v4.content.res.ResourcesCompat
+import androidx.core.content.res.ResourcesCompat
 import cz.adsb.czadsb.R
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.utils.AircraftLabel

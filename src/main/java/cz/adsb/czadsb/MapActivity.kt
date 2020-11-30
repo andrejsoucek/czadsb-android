@@ -1,27 +1,20 @@
 package cz.adsb.czadsb
 
-import android.content.Context
-import android.location.LocationManager
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.support.design.widget.BottomSheetBehavior
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
-import com.github.clans.fab.FloatingActionButton
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import com.github.clans.fab.FloatingActionMenu
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import cz.adsb.czadsb.factories.DialogFactory
 import cz.adsb.czadsb.factories.OverlayFactory
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
 import cz.adsb.czadsb.utils.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.find
-import org.jetbrains.anko.toast
-import org.jetbrains.anko.uiThread
+import kotlinx.android.synthetic.main.activity_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -33,6 +26,13 @@ import org.osmdroid.views.overlay.Marker
 import java.util.*
 import kotlin.concurrent.timer
 import kotlin.concurrent.timerTask
+import kotlinx.android.synthetic.main.aircraft_info.*
+import kotlinx.android.synthetic.main.aircraft_info_full.*
+import kotlinx.android.synthetic.main.aircraft_info_peek.*
+import kotlinx.android.synthetic.main.floating_menu.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.osmdroid.views.CustomZoomButtonsController
 
 
 class MapActivity : AppCompatActivity(), MapEventsReceiver {
@@ -43,13 +43,13 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     private lateinit var bSheetBehavior: BottomSheetBehavior<View>
     private lateinit var actionMenu: FloatingActionMenu
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         val ctx = applicationContext
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_map)
 
-        val map = find<MapView>(R.id.map)
         configureMap(map)
 
         actionMenu = configureActionMenu(map)
@@ -59,26 +59,16 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
 
         val mOverlay = OverlayFactory.createMarkersOverlay(map)
-        timer(null, false, 0, getRefreshRate(), {
+        timer(null, false, 0, getRefreshRate()) {
             refreshAircrafts(map, mOverlay)
             runOnUiThread { refreshAircraftInfo() }
             centerMapOnSelectedAircraft(map)
-        })
+        }
     }
 
     override fun onResume() {
         super.onResume()
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
-    }
-
-    private fun getStartPoint() : GeoPoint {
-        val locationManger: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val lastLoc = locationManger.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-        return if (lastLoc != null) {
-            GeoPoint(lastLoc.latitude, lastLoc.longitude)
-        } else {
-            GeoPoint(50.0755381, 14.4378005)
-        }
     }
 
     private fun refreshAircrafts(map: MapView, mOverlay: FolderOverlay) {
@@ -99,31 +89,30 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         return true
     }
 
-    private fun fillStaticAircraftInfo(aircraft:Aircraft) {
+    private fun fillStaticAircraftInfo(aircraft: Aircraft) {
         // peeking
-        find<TextView>(R.id.callsign).text = aircraft.callsign
-        find<TextView>(R.id.operator).text = aircraft.operator
-        find<TextView>(R.id.from).text = aircraft.from?.firstChars(3) ?: "N/A"
-        find<TextView>(R.id.to).text = aircraft.to?.firstChars(3) ?: "N/A"
-        find<TextView>(R.id.ac_type).text = aircraft.manufacturer?.concatenate(aircraft.type, " ") ?: "N/A"
-        find<TextView>(R.id.registration).text = aircraft.registration ?: "Reg. N/A"
+        callsign.text = aircraft.callsign
+        operator.text = aircraft.operator
+        from.text = aircraft.from?.firstChars(3) ?: "N/A"
+        to.text = aircraft.to?.firstChars(3) ?: "N/A"
+        ac_type.text = aircraft.manufacturer?.concatenate(aircraft.type, " ") ?: "N/A"
+        registration.text = aircraft.registration ?: "Reg. N/A"
         // expanded
-        find<TextView>(R.id.modelTV).text = aircraft.model ?: getString(R.string.unknown_aircraft)
-        find<TextView>(R.id.icaoTV).text = aircraft.icao ?: "N/A"
+        modelTV.text = aircraft.model ?: getString(R.string.unknown_aircraft)
+        icaoTV.text = aircraft.icao ?: "N/A"
     }
 
     private fun refreshAircraftInfo() {
         if (selectedAircraftId != null) {
-            val aircraft = aircraftList.aircrafts[selectedAircraftId!!]
-            val altTv = find<TextView>(R.id.altTV)
+            val aircraft = aircraftList.aircrafts[selectedAircraftId]
             if (aircraft?.onGround == true) {
-                altTv.text = "GND"
+                altTV.text = "GND"
             } else {
-                altTv.text = aircraft?.amslAlt.toAltitude()
+                altTV.text = aircraft?.amslAlt.toAltitude()
             }
-            find<TextView>(R.id.speedTV).text = aircraft?.spd.toSpeed()
-            find<TextView>(R.id.headingTV).text = aircraft?.hdg.toHeading()
-            find<TextView>(R.id.squawkTV).text = aircraft?.squawk ?: "N/A"
+            speedTV.text = aircraft?.spd.toSpeed()
+            headingTV.text = aircraft?.hdg.toHeading()
+            squawkTV.text = aircraft?.squawk ?: "N/A"
         }
     }
 
@@ -141,7 +130,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         val south = map.boundingBox.latSouth
         val west = map.boundingBox.lonWest
         val east = map.boundingBox.lonEast
-        doAsync {
+        GlobalScope.launch {
             aircraftList = PlanesFetcher.fetchAircrafts(applicationContext, aircraftList, north, south, west, east)
             aircraftList.aircrafts.forEach {
                 val aircraft = it.value
@@ -152,7 +141,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                         if (!(aircraft.type == "BALL" || aircraft.type == "RADAR")) {
                             aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg!!.toFloat()
                         }
-                        uiThread {
+                        runOnUiThread {
                             // UGLY but working
                             aircraftMarkersMap[aircraft.id]?.closeInfoWindow()
                             aircraftMarkersMap[aircraft.id]?.showInfoWindow()
@@ -165,7 +154,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                         }
                         aircraftMarkersMap.put(aircraft.id, aMarker)
                         mOverlay.add(aMarker)
-                        uiThread {
+                        runOnUiThread {
                             aMarker.showInfoWindow()
                         }
                     }
@@ -179,36 +168,31 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                 val marker = aircraftMarkersMap[it]
                 mOverlay.items.remove(marker)
                 aircraftMarkersMap.remove(it)
-                uiThread {
+                runOnUiThread {
                     marker?.closeInfoWindow()
                 }
             }
 
-            uiThread {
+            runOnUiThread {
                 map.invalidate()
             }
         }
     }
 
     private fun getRefreshRate() : Long {
-        return if (UserManager.isUserLoggedIn(applicationContext)) {
-            getProperty("refresh_rate_private").toLong()
-        } else {
-            getProperty("refresh_rate_public").toLong()
-        }
+        return getProperty("refresh_rate").toLong()
     }
 
     /********************* LAYOUT CONFIG ********************/
 
     private fun configureMap(map: MapView) {
         map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setBuiltInZoomControls(false)
+        map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER);
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
-        val startPoint = getStartPoint()
-        mapController.setCenter(startPoint)
-        mapController.setZoom(9)
+        mapController.setCenter(GeoPoint(50.0755381, 14.4378005))
+        mapController.setZoom(9.0)
 
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(eventsOverlay)
@@ -225,38 +209,38 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     }
 
     private fun configureActionMenu(map: MapView): FloatingActionMenu {
-        val menu = find<FloatingActionMenu>(R.id.floating_action_menu)
-        val loginBtn = find<FloatingActionButton>(R.id.login_button)
-        val filtersBtn = find<FloatingActionButton>(R.id.filters_button)
-        val preferencesBtn = find<FloatingActionButton>(R.id.preferences_button)
-
-        menu.setOnMenuToggleListener {
+        floating_action_menu.setOnMenuToggleListener {
             when (UserManager.isUserLoggedIn(applicationContext)) {
-                true -> loginBtn.labelText = getString(R.string.Logout)
-                false -> loginBtn.labelText = getString(R.string.Login)
+                true -> login_button.labelText = getString(R.string.Logout)
+                false -> login_button.labelText = getString(R.string.Login)
             }
         }
 
-        loginBtn.setOnClickListener {
-            when (UserManager.isUserLoggedIn(applicationContext)) {
-                true -> { UserManager.logout(applicationContext); toast(R.string.you_have_been_logged_out) }
-                false -> DialogFactory.createLoginDialog(map).show()
+        login_button.setOnClickListener {
+            if (UserManager.isUserLoggedIn(applicationContext)) {
+                UserManager.logout(applicationContext);
+                Toast.makeText(
+                    applicationContext,
+                    R.string.you_have_been_logged_out,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                DialogFactory.createLoginDialog(map).show()
             }
-            menu.close(true)
+            floating_action_menu.close(true)
         }
-        filtersBtn.setOnClickListener {
+        filters_button.setOnClickListener {
             //TODO
         }
-        preferencesBtn.setOnClickListener {
+        preferences_button.setOnClickListener {
             //TODO
         }
-        return menu
+        return floating_action_menu
     }
 
     private fun configureBottomSheet(map: MapView) : BottomSheetBehavior<View> {
-        val bSheet = find<View>(R.id.bottom_sheet)
-        bSheetBehavior = BottomSheetBehavior.from(bSheet)
-        bSheetBehavior.setBottomSheetCallback(object:BottomSheetBehavior.BottomSheetCallback() {
+        bSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
+        bSheetBehavior.addBottomSheetCallback(object:BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_COLLAPSED -> {
@@ -266,7 +250,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                     }
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         if (map.layoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT) {
-                            map.layoutParams.height = map.height - find<LinearLayout>(R.id.bottom_sheet).height
+                            map.layoutParams.height = map.height - bottom_sheet.height
                         }
                     }
                     BottomSheetBehavior.STATE_HIDDEN -> {
@@ -277,7 +261,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                 }
                 map.requestLayout()
                 //centering needs to be delayed
-                Timer().schedule(timerTask {centerMapOnSelectedAircraft(map)}, 50)
+                Timer().schedule(timerTask { centerMapOnSelectedAircraft(map) }, 50)
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {

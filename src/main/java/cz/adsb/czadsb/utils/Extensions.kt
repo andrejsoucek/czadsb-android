@@ -1,8 +1,8 @@
 package cz.adsb.czadsb.utils
 
 import android.content.Context
-import android.support.design.widget.BottomSheetBehavior
 import android.view.View
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import cz.adsb.czadsb.R
 import java.util.*
 
