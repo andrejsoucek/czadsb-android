@@ -5,106 +5,108 @@ import org.osmdroid.util.GeoPoint
 
 data class Aircraft(
     @SerializedName("Id")
-    var id: Number,
+    val id: Number,
     @SerializedName("TSecs")
-    var secondsTracked: Number,
+    val secondsTracked: Number,
     @SerializedName("Rcvr")
-    var receiverId: Number,
+    val receiverId: Number,
     @SerializedName("HasSig")
-    var hasSignal: Boolean?,
+    val hasSignal: Boolean?,
     @SerializedName("Icao")
-    var icao: String?,
+    val icao: String?,
     @SerializedName("Bad")
-    var invalidIcao: Boolean?,
+    val invalidIcao: Boolean?,
     @SerializedName("Reg")
-    var registration: String?,
+    val registration: String?,
     @SerializedName("FSeen")
-    var fSeen: String?,
+    val fSeen: String?,
     @SerializedName("CMsgs")
-    var messagesReceived: Number?,
+    val messagesReceived: Number?,
     @SerializedName("Alt")
-    var stPressureAlt: Number?,
+    val stPressureAlt: Number?,
     @SerializedName("GAlt")
-    var amslAlt: Number?,
+    val amslAlt: Number?,
     @SerializedName("InHg")
-    var inHg: Number?,
+    val inHg: Number?,
     @SerializedName("AltT")
-    var AltType: Number?,
+    val AltType: Number?,
     @SerializedName("Call")
-    var callsign: String?,
+    val callsign: String?,
     @SerializedName("Lat")
-    var lat: Number?,
+    val lat: Number?,
     @SerializedName("Long")
-    var long: Number?,
+    val long: Number?,
     @SerializedName("PosTime")
-    var lastReported: Number?,
+    val lastReported: Number?,
     @SerializedName("Mlat")
-    var mlat: Boolean?,
+    val mlat: Boolean?,
     @SerializedName("Tisb")
-    var tisb: Boolean?,
+    val tisb: Boolean?,
     @SerializedName("Spd")
-    var spd: Number?,
+    val spd: Number?,
     @SerializedName("Trak")
-    var hdg: Number?,
+    val hdg: Number?,
     @SerializedName("TrkH")
-    var trkH: Boolean?,
+    val trkH: Boolean?,
     @SerializedName("Type")
-    var type: String?,
+    val type: String?,
     @SerializedName("Mdl")
-    var model: String?,
+    val model: String?,
     @SerializedName("Man")
-    var manufacturer: String?,
+    val manufacturer: String?,
     @SerializedName("CNum")
-    var serialNumber: String?,
+    val serialNumber: String?,
     @SerializedName("From")
-    var from: String?,
+    val from: String?,
     @SerializedName("To")
-    var to: String?,
+    val to: String?,
     @SerializedName("Op")
-    var operator: String?,
+    val operator: String?,
     @SerializedName("OpIcao")
-    var operatorIcao: String?,
+    val operatorIcao: String?,
     @SerializedName("Sqk")
-    var squawk: String?,
+    val squawk: String?,
     @SerializedName("Help")
-    var emergency: Boolean?,
+    val emergency: Boolean?,
     @SerializedName("Vsi")
-    var vSpd: Number?,
+    val vSpd: Number?,
     @SerializedName("VsiT")
-    var vSpdType: Number?,
+    val vSpdType: Number?,
     @SerializedName("WTC")
-    var wakeTurbulenceCat: Number?,
+    val wakeTurbulenceCat: Number?,
     @SerializedName("Species")
-    var species: Number?,
+    val species: Number?,
     @SerializedName("Engines")
-    var engines: String?,
+    val engines: String?,
     @SerializedName("EngType")
-    var engineType: Number?,
+    val engineType: Number?,
     @SerializedName("EngMount")
-    var engineMount: Number?,
+    val engineMount: Number?,
     @SerializedName("Mil")
-    var military: Boolean?,
+    val military: Boolean?,
     @SerializedName("Cou")
-    var country: String?,
+    val country: String?,
     @SerializedName("HasPic")
-    var hasPic: Boolean?,
+    val hasPic: Boolean?,
     @SerializedName("Interested")
-    var interesting: Boolean?,
+    val interesting: Boolean?,
     @SerializedName("FlightsCount")
-    var flightsCount: Number?,
+    val flightsCount: Number?,
     @SerializedName("Gnd")
-    var onGround: Boolean?,
+    val onGround: Boolean?,
     @SerializedName("SpdTyp")
-    var speedType: Number?,
+    val speedType: Number?,
     @SerializedName("CallSus")
-    var invalidCallsign: Boolean?,
+    val invalidCallsign: Boolean?,
     @SerializedName("Trt")
-    var transponderType: Number?,
+    val transponderType: Number?,
     @SerializedName("Year")
-    var manufactured: String?
+    val manufactured: String?
 ) {
     val position: GeoPoint?
-        get() = if (willShowOnMap()) GeoPoint(lat!!.toDouble(), long!!.toDouble(), amslAlt!!.toDouble()) else null
+        get() = if (willShowOnMap()) {
+            GeoPoint(lat!!.toDouble(), long!!.toDouble(), amslAlt!!.toDouble())
+        } else null
 
     val iconName: String
         get() {
@@ -176,7 +178,7 @@ data class Aircraft(
                 return IconTypeEnum.A380.iconName
             }
 
-            if (type == "E6" || (type?.length == 4 && type!!.startsWith("A34", true))){
+            if (type == "E6" || (type != null && type.length == 4 && type.startsWith("A34", true))){
                 return IconTypeEnum.A340.iconName
             }
 
@@ -225,8 +227,8 @@ data class Aircraft(
             return IconTypeEnum.AIRPLANE.iconName
         }
 
-    fun willShowOnMap(): Boolean = this.lat !== null && this.long !== null && this.amslAlt !== null && this.hdg !== null
+    fun willShowOnMap(): Boolean = this.lat != null && this.long != null && this.amslAlt != null && this.hdg != null
 
-    override fun equals(other: Any?): Boolean = other is Aircraft && this.id === other.id
+    override fun equals(other: Any?): Boolean = other is Aircraft && this.id == other.id
     override fun hashCode(): Int = id.hashCode()
 }

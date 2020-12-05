@@ -11,7 +11,6 @@ import cz.adsb.czadsb.exceptions.InvalidCredentialsException
 import cz.adsb.czadsb.exceptions.RedirectionException
 import cz.adsb.czadsb.exceptions.ServerErrorException
 import cz.adsb.czadsb.model.User
-import cz.adsb.czadsb.utils.UserManager
 import kotlinx.android.synthetic.main.login_dialog.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -31,12 +30,15 @@ object DialogFactory {
             dialog.cancel()
         }
         alert.setPositiveButton(R.string.Login) { dialog, _ ->
-            val user = User(layout.et_username.text.toString(), layout.et_password.text.toString())
             var loginTextResource: Int
             GlobalScope.launch {
                 try {
-                    val login = UserManager.login(parentView.context.applicationContext, user)
-                    loginTextResource = if (login) {
+                    val loginSuccessful = User.login(
+                        parentView.context.applicationContext,
+                        layout.et_username.text.toString(),
+                        layout.et_password.text.toString(),
+                    )
+                    loginTextResource = if (loginSuccessful) {
                         R.string.login_successful
                     } else {
                         R.string.unexpected_error_while_logging_in

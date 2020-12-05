@@ -1,4 +1,4 @@
-package cz.adsb.czadsb.utils
+package cz.adsb.czadsb.model
 
 import android.view.View
 import kotlinx.android.synthetic.main.aircraft_label.view.*

@@ -13,6 +13,8 @@ import cz.adsb.czadsb.factories.DialogFactory
 import cz.adsb.czadsb.factories.OverlayFactory
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
+import cz.adsb.czadsb.model.User
+import cz.adsb.czadsb.services.PlanesFetcher
 import cz.adsb.czadsb.utils.*
 import kotlinx.android.synthetic.main.activity_map.*
 import org.osmdroid.config.Configuration
@@ -46,21 +48,19 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        val ctx = applicationContext
-        Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
+        Configuration.getInstance().load(applicationContext, PreferenceManager.getDefaultSharedPreferences(applicationContext))
         setContentView(R.layout.activity_map)
 
-        configureMap(map)
+        val mapView = configureMap(map)
 
-        actionMenu = configureActionMenu(map)
-
-        bSheetBehavior = configureBottomSheet(map)
+        actionMenu = configureActionMenu(mapView)
+        bSheetBehavior = configureBottomSheet(mapView)
         bSheetBehavior.hide()
 
 
-        val mOverlay = OverlayFactory.createMarkersOverlay(map)
+        val markersOverlay = OverlayFactory.createMarkersOverlay(mapView)
         timer(null, false, 0, getRefreshRate()) {
-            refreshAircrafts(map, mOverlay)
+            refreshAircrafts(map, markersOverlay)
             runOnUiThread { refreshAircraftInfo() }
             centerMapOnSelectedAircraft(map)
         }
@@ -71,11 +71,11 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
     }
 
-    private fun refreshAircrafts(map: MapView, mOverlay: FolderOverlay) {
+    private fun refreshAircrafts(map: MapView, markersOverlay: FolderOverlay) {
         if (map.getScreenRect(null).height() == 0) {
-            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAircraftsForView(map, mOverlay) }
+            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAircraftsForView(map, markersOverlay) }
         } else {
-            loadAircraftsForView(map, mOverlay)
+            loadAircraftsForView(map, markersOverlay)
         }
     }
 
@@ -118,20 +118,20 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
     private fun centerMapOnSelectedAircraft(map: MapView) {
         if (selectedAircraftId != null) {
-            val selAcMarker = aircraftMarkersMap[selectedAircraftId!!]
+            val selAcMarker = aircraftMarkersMap[selectedAircraftId]
             if (selAcMarker != null) {
                 map.controller.animateTo(selAcMarker.position)
             }
         }
     }
 
-    private fun loadAircraftsForView(map: MapView, mOverlay: FolderOverlay) {
+    private fun loadAircraftsForView(map: MapView, markersOverlay: FolderOverlay) {
         val north = map.boundingBox.latNorth
         val south = map.boundingBox.latSouth
         val west = map.boundingBox.lonWest
         val east = map.boundingBox.lonEast
         GlobalScope.launch {
-            aircraftList = PlanesFetcher.fetchAircrafts(applicationContext, aircraftList, north, south, west, east)
+            aircraftList = PlanesFetcher.fetch(applicationContext, aircraftList, north, south, west, east)
             aircraftList.aircrafts.forEach {
                 val aircraft = it.value
                 if (aircraft.willShowOnMap()) {
@@ -139,7 +139,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                         aircraftMarkersMap[aircraft.id]?.position = aircraft.position
                         // do not rotate balloon icon
                         if (!(aircraft.type == "BALL" || aircraft.type == "RADAR")) {
-                            aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg!!.toFloat()
+                            aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg?.toFloat() ?: 0f
                         }
                         runOnUiThread {
                             // UGLY but working
@@ -153,7 +153,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                             selectAircraft(aircraft)
                         }
                         aircraftMarkersMap.put(aircraft.id, aMarker)
-                        mOverlay.add(aMarker)
+                        markersOverlay.add(aMarker)
                         runOnUiThread {
                             aMarker.showInfoWindow()
                         }
@@ -166,7 +166,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                     return@forEach
                 }
                 val marker = aircraftMarkersMap[it]
-                mOverlay.items.remove(marker)
+                markersOverlay.items.remove(marker)
                 aircraftMarkersMap.remove(it)
                 runOnUiThread {
                     marker?.closeInfoWindow()
@@ -185,40 +185,42 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
     /********************* LAYOUT CONFIG ********************/
 
-    private fun configureMap(map: MapView) {
+    private fun configureMap(map: MapView): MapView {
+        val defaultMapCenter = GeoPoint(50.0755381, 14.4378005);
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER);
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
-        mapController.setCenter(GeoPoint(50.0755381, 14.4378005))
+        mapController.setCenter(defaultMapCenter)
         mapController.setZoom(9.0)
 
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(eventsOverlay)
 
-        map.setOnTouchListener(View.OnTouchListener { v, event ->
+        map.setOnTouchListener(View.OnTouchListener { _, event ->
             if (selectedAircraftId != null) {
                 if (event.action == MotionEvent.ACTION_UP) {
-                    mapController.setCenter(aircraftMarkersMap[selectedAircraftId!!]?.position)
+                    mapController.setCenter(aircraftMarkersMap[selectedAircraftId]?.position ?: defaultMapCenter)
                     return@OnTouchListener false
                 }
             }
             false
         })
+        return map;
     }
 
     private fun configureActionMenu(map: MapView): FloatingActionMenu {
         floating_action_menu.setOnMenuToggleListener {
-            when (UserManager.isUserLoggedIn(applicationContext)) {
+            when (User.isLoggedIn(applicationContext)) {
                 true -> login_button.labelText = getString(R.string.Logout)
                 false -> login_button.labelText = getString(R.string.Login)
             }
         }
 
         login_button.setOnClickListener {
-            if (UserManager.isUserLoggedIn(applicationContext)) {
-                UserManager.logout(applicationContext);
+            if (User.isLoggedIn(applicationContext)) {
+                User.logout(applicationContext);
                 Toast.makeText(
                     applicationContext,
                     R.string.you_have_been_logged_out,

@@ -3,7 +3,7 @@ package cz.adsb.czadsb.factories
 import androidx.core.content.res.ResourcesCompat
 import cz.adsb.czadsb.R
 import cz.adsb.czadsb.model.Aircraft
-import cz.adsb.czadsb.utils.AircraftLabel
+import cz.adsb.czadsb.model.AircraftLabel
 import cz.adsb.czadsb.utils.getDrawableIdByName
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
@@ -25,7 +25,7 @@ object OverlayFactory {
         aMarker.position = aircraft.position
         // do not rotate balloon and radar icon
         if (!(aircraft.type == "BALL" || aircraft.type == "RADAR")) {
-            aMarker.rotation = aircraft.hdg!!.toFloat()
+            aMarker.rotation = aircraft.hdg?.toFloat() ?: 0f;
         }
         aMarker.isDraggable = false
         aMarker.infoWindow = AircraftLabel(R.layout.aircraft_label, map, aircraft.callsign, aircraft.registration)
