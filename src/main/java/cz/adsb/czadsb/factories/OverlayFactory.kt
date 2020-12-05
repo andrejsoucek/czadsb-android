@@ -25,7 +25,7 @@ object OverlayFactory {
         aMarker.position = aircraft.position
         // do not rotate balloon and radar icon
         if (!(aircraft.type == "BALL" || aircraft.type == "RADAR")) {
-            aMarker.rotation = aircraft.hdg?.toFloat() ?: 0f;
+            aMarker.rotation = aircraft.hdg?.toFloat()?.times(-1) ?: 0f;
         }
         aMarker.isDraggable = false
         aMarker.infoWindow = AircraftLabel(R.layout.aircraft_label, map, aircraft.callsign, aircraft.registration)

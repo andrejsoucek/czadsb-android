@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.auth0.android.Auth0
 import com.auth0.android.Auth0Exception
@@ -36,13 +37,11 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import java.util.*
 import kotlin.concurrent.timer
-import kotlin.concurrent.timerTask
 import kotlinx.android.synthetic.main.aircraft_info.*
 import kotlinx.android.synthetic.main.aircraft_info_full.*
 import kotlinx.android.synthetic.main.aircraft_info_peek.*
 import kotlinx.android.synthetic.main.floating_menu.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.osmdroid.views.CustomZoomButtonsController
 
 
@@ -70,8 +69,10 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
             val markersOverlay = OverlayFactory.createMarkersOverlay(mapView)
             timer(null, false, 0, getRefreshRate()) {
                 refreshAircrafts(map, markersOverlay)
-                runOnUiThread { refreshAircraftInfo() }
-                centerMapOnSelectedAircraft(map)
+                runOnUiThread {
+                    centerMapOnSelectedAircraft(map)
+                    refreshAircraftInfo()
+                }
             }
         }
     }
@@ -83,9 +84,9 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
 
     private fun refreshAircrafts(map: MapView, markersOverlay: FolderOverlay) {
         if (map.getScreenRect(null).height() == 0) {
-            map.addOnFirstLayoutListener { _, _, _, _, _ -> loadAircraftsForView(map, markersOverlay) }
+            map.addOnFirstLayoutListener { _, _, _, _, _ -> lifecycleScope.launch { loadAircraftsForView(map, markersOverlay) }}
         } else {
-            loadAircraftsForView(map, markersOverlay)
+            lifecycleScope.launch { loadAircraftsForView(map, markersOverlay) }
         }
     }
 
@@ -146,12 +147,12 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                 val aircraft = it.value
                 if (aircraft.willShowOnMap()) {
                     if (aircraftMarkersMap.containsKey(aircraft.id)) {
-                        aircraftMarkersMap[aircraft.id]?.position = aircraft.position
-                        // do not rotate balloon icon
-                        if (!(aircraft.type == "BALL" || aircraft.type == "RADAR")) {
-                            aircraftMarkersMap[aircraft.id]?.rotation = aircraft.hdg?.toFloat() ?: 0f
-                        }
                         runOnUiThread {
+                            aircraftMarkersMap[aircraft.id]!!.position = aircraft.position
+                            // do not rotate balloon icon
+                            if (!(aircraft.type == "BALL" || aircraft.type == "RADAR")) {
+                                aircraftMarkersMap[aircraft.id]!!.rotation = aircraft.hdg?.toFloat()?.times(-1) ?: 0f
+                            }
                             // UGLY but working
                             aircraftMarkersMap[aircraft.id]?.closeInfoWindow()
                             aircraftMarkersMap[aircraft.id]?.showInfoWindow()
@@ -295,7 +296,7 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                 }
                 map.requestLayout()
                 //centering needs to be delayed
-                Timer().schedule(timerTask { centerMapOnSelectedAircraft(map) }, 50)
+                centerMapOnSelectedAircraft(map)
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
