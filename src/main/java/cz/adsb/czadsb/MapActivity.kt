@@ -1,19 +1,28 @@
 package cz.adsb.czadsb
 
+import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.auth0.android.Auth0
+import com.auth0.android.Auth0Exception
+import com.auth0.android.authentication.AuthenticationException
+import com.auth0.android.provider.AuthCallback
+import com.auth0.android.provider.VoidCallback
+import com.auth0.android.provider.WebAuthProvider
+import com.auth0.android.result.Credentials
 import com.github.clans.fab.FloatingActionMenu
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import cz.adsb.czadsb.factories.DialogFactory
 import cz.adsb.czadsb.factories.OverlayFactory
 import cz.adsb.czadsb.model.Aircraft
 import cz.adsb.czadsb.model.AircraftList
 import cz.adsb.czadsb.model.User
+import cz.adsb.czadsb.services.Authenticator
 import cz.adsb.czadsb.services.PlanesFetcher
 import cz.adsb.czadsb.utils.*
 import kotlinx.android.synthetic.main.activity_map.*
@@ -57,12 +66,13 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         bSheetBehavior = configureBottomSheet(mapView)
         bSheetBehavior.hide()
 
-
-        val markersOverlay = OverlayFactory.createMarkersOverlay(mapView)
-        timer(null, false, 0, getRefreshRate()) {
-            refreshAircrafts(map, markersOverlay)
-            runOnUiThread { refreshAircraftInfo() }
-            centerMapOnSelectedAircraft(map)
+        if (User.isLoggedIn(this)) {
+            val markersOverlay = OverlayFactory.createMarkersOverlay(mapView)
+            timer(null, false, 0, getRefreshRate()) {
+                refreshAircrafts(map, markersOverlay)
+                runOnUiThread { refreshAircraftInfo() }
+                centerMapOnSelectedAircraft(map)
+            }
         }
     }
 
@@ -219,7 +229,17 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
         }
 
         login_button.setOnClickListener {
+            val auth0 = Auth0(this)
+            auth0.isOIDCConformant = true
             if (User.isLoggedIn(applicationContext)) {
+                WebAuthProvider.logout(auth0)
+                    .withScheme("demo")
+                    .start(this, object : VoidCallback {
+                        override fun onSuccess(payload: Void?) {}
+                        override fun onFailure(error: Auth0Exception) {
+                            // Show error to user
+                        }
+                    })
                 User.logout(applicationContext);
                 Toast.makeText(
                     applicationContext,
@@ -227,7 +247,19 @@ class MapActivity : AppCompatActivity(), MapEventsReceiver {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                DialogFactory.createLoginDialog(map).show()
+                val authenticator = Authenticator(auth0)
+                authenticator.authenticate(this@MapActivity, object : AuthCallback {
+                    override fun onFailure(dialog: Dialog) {
+                    }
+
+                    override fun onFailure(exception: AuthenticationException) {
+                        Log.e("auth", "authentication failed", exception)
+                    }
+
+                    override fun onSuccess(credentials: Credentials) {
+                        User.login(applicationContext, credentials)
+                    }
+                })
             }
             floating_action_menu.close(true)
         }

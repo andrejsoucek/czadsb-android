@@ -20,9 +20,7 @@ object PlanesFetcher {
     private fun fetchFull(ctx: Context, north: Double, south: Double, west: Double, east: Double): AircraftList
     {
         val request = Fuel.post("${resolveUrl(ctx)}?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
-        if (User.isLoggedIn(ctx)) {
-            // authenticate
-        }
+            .appendHeader("Authorization", "Bearer ${User.getIdentity(ctx)}")
         val (_, _, result) = request.responseObject(AircraftList.Deserializer())
         val (aircraftList, _) = result
         return aircraftList ?: AircraftList()
@@ -31,10 +29,7 @@ object PlanesFetcher {
     private fun fetchChanges(ctx: Context, ldv: String, north: Double, south: Double, west: Double, east: Double): AircraftList
     {
         val request = Fuel.post("${resolveUrl(ctx)}?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
-        if (User.isLoggedIn(ctx)) {
-            val user = User.getIdentity(ctx)
-            // authenticate
-        }
+            .appendHeader("Authorization", "Bearer ${User.getIdentity(ctx)}")
         val (_, _, result) = request.responseObject(AircraftList.Deserializer())
         val (aircraftList, _) = result
         return aircraftList ?: AircraftList()

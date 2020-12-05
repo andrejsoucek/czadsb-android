@@ -20,4 +20,6 @@
     <string name="heading">Kurz:</string>
     <string name="squawk">Kód odpovídače:</string>
     <string name="unknown_aircraft">Neznámý typ letounu</string>
+    <string name="com_auth0_client_id">ITqkED4MFYkEDv9pzE4CW0Al7vTEqS0O</string>
+    <string name="com_auth0_domain">czadsb.eu.auth0.com</string>
 </resources>
