@@ -9,9 +9,9 @@ import java.util.*
 /****** Context *********/
 fun Context.getDrawableIdByName(resName: String) : Int {
     return try {
-        this.resources.getIdentifier(resName, "drawable", packageName)
+        this.resources.getIdentifier("marker_${resName}", "drawable", packageName)
     } catch (e: Exception) {
-        R.drawable.ic_airliner_icon
+        R.drawable.marker_generic
     }
 }
 

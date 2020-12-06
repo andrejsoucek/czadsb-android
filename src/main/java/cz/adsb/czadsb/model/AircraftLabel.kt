@@ -16,7 +16,7 @@ class AircraftLabel(
 {
     override fun open(item: Any, position: GeoPoint, offsetX: Int, offsetY: Int)
     {
-        super.open(item, (item as Marker).position, 0, 0)
+        super.open(item, (item as Marker).position, 0, 80)
     }
 
     override fun onOpen(item: Any?)

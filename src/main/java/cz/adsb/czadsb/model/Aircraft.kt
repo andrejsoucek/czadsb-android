@@ -4,104 +4,55 @@ import com.google.gson.annotations.SerializedName
 import org.osmdroid.util.GeoPoint
 
 data class Aircraft(
-    @SerializedName("Id")
-    val id: Number,
-    @SerializedName("TSecs")
-    val secondsTracked: Number,
-    @SerializedName("Rcvr")
-    val receiverId: Number,
-    @SerializedName("HasSig")
-    val hasSignal: Boolean?,
-    @SerializedName("Icao")
-    val icao: String?,
-    @SerializedName("Bad")
-    val invalidIcao: Boolean?,
-    @SerializedName("Reg")
-    val registration: String?,
-    @SerializedName("FSeen")
-    val fSeen: String?,
-    @SerializedName("CMsgs")
-    val messagesReceived: Number?,
-    @SerializedName("Alt")
-    val stPressureAlt: Number?,
-    @SerializedName("GAlt")
-    val amslAlt: Number?,
-    @SerializedName("InHg")
-    val inHg: Number?,
-    @SerializedName("AltT")
-    val AltType: Number?,
-    @SerializedName("Call")
-    val callsign: String?,
-    @SerializedName("Lat")
-    val lat: Number?,
-    @SerializedName("Long")
-    val long: Number?,
-    @SerializedName("PosTime")
-    val lastReported: Number?,
-    @SerializedName("Mlat")
-    val mlat: Boolean?,
-    @SerializedName("Tisb")
-    val tisb: Boolean?,
-    @SerializedName("Spd")
-    val spd: Number?,
-    @SerializedName("Trak")
-    val hdg: Number?,
-    @SerializedName("TrkH")
-    val trkH: Boolean?,
-    @SerializedName("Type")
-    val type: String?,
-    @SerializedName("Mdl")
-    val model: String?,
-    @SerializedName("Man")
-    val manufacturer: String?,
-    @SerializedName("CNum")
-    val serialNumber: String?,
-    @SerializedName("From")
-    val from: String?,
-    @SerializedName("To")
-    val to: String?,
-    @SerializedName("Op")
-    val operator: String?,
-    @SerializedName("OpIcao")
-    val operatorIcao: String?,
-    @SerializedName("Sqk")
-    val squawk: String?,
-    @SerializedName("Help")
-    val emergency: Boolean?,
-    @SerializedName("Vsi")
-    val vSpd: Number?,
-    @SerializedName("VsiT")
-    val vSpdType: Number?,
-    @SerializedName("WTC")
-    val wakeTurbulenceCat: Number?,
-    @SerializedName("Species")
-    val species: Number?,
-    @SerializedName("Engines")
-    val engines: String?,
-    @SerializedName("EngType")
-    val engineType: Number?,
-    @SerializedName("EngMount")
-    val engineMount: Number?,
-    @SerializedName("Mil")
-    val military: Boolean?,
-    @SerializedName("Cou")
-    val country: String?,
-    @SerializedName("HasPic")
-    val hasPic: Boolean?,
-    @SerializedName("Interested")
-    val interesting: Boolean?,
-    @SerializedName("FlightsCount")
-    val flightsCount: Number?,
-    @SerializedName("Gnd")
-    val onGround: Boolean?,
-    @SerializedName("SpdTyp")
-    val speedType: Number?,
-    @SerializedName("CallSus")
-    val invalidCallsign: Boolean?,
-    @SerializedName("Trt")
-    val transponderType: Number?,
-    @SerializedName("Year")
-    val manufactured: String?
+    @SerializedName("Id") val id: Number,
+    @SerializedName("TSecs") val secondsTracked: Number,
+    @SerializedName("Rcvr") val receiverId: Number,
+    @SerializedName("HasSig") val hasSignal: Boolean?,
+    @SerializedName("Icao") val icao: String?,
+    @SerializedName("Bad") val invalidIcao: Boolean?,
+    @SerializedName("Reg") val registration: String?,
+    @SerializedName("FSeen") val fSeen: String?,
+    @SerializedName("CMsgs") val messagesReceived: Number?,
+    @SerializedName("Alt") val stPressureAlt: Number?,
+    @SerializedName("GAlt") val amslAlt: Number?,
+    @SerializedName("InHg") val inHg: Number?,
+    @SerializedName("AltT") val AltType: Number?,
+    @SerializedName("Call") val callsign: String?,
+    @SerializedName("Lat") val lat: Number?,
+    @SerializedName("Long") val long: Number?,
+    @SerializedName("PosTime") val lastReported: Number?,
+    @SerializedName("Mlat") val mlat: Boolean?,
+    @SerializedName("Tisb") val tisb: Boolean?,
+    @SerializedName("Spd") val spd: Number?,
+    @SerializedName("Trak") val hdg: Number?,
+    @SerializedName("TrkH") val trkH: Boolean?,
+    @SerializedName("Type") val type: String?,
+    @SerializedName("Mdl") val model: String?,
+    @SerializedName("Man") val manufacturer: String?,
+    @SerializedName("CNum") val serialNumber: String?,
+    @SerializedName("From") val from: String?,
+    @SerializedName("To") val to: String?,
+    @SerializedName("Op") val operator: String?,
+    @SerializedName("OpIcao") val operatorIcao: String?,
+    @SerializedName("Sqk") val squawk: String?,
+    @SerializedName("Help") val emergency: Boolean?,
+    @SerializedName("Vsi") val vSpd: Number?,
+    @SerializedName("VsiT") val vSpdType: Number?,
+    @SerializedName("WTC") val wakeTurbulenceCat: Int?,
+    @SerializedName("Species") val species: Int?,
+    @SerializedName("Engines") val engines: String?,
+    @SerializedName("EngType") val engineType: Int?,
+    @SerializedName("EngMount") val engineMount: Int?,
+    @SerializedName("Mil") val military: Boolean?,
+    @SerializedName("Cou") val country: String?,
+    @SerializedName("HasPic") val hasPic: Boolean?,
+    @SerializedName("Interested") val interesting: Boolean?,
+    @SerializedName("FlightsCount") val flightsCount: Number?,
+    @SerializedName("Gnd") val onGround: Boolean?,
+    @SerializedName("SpdTyp") val speedType: Number?,
+    @SerializedName("CallSus") val invalidCallsign: Boolean?,
+    @SerializedName("Trt") val transponderType: Number?,
+    @SerializedName("Year") val manufactured: String?
 ) {
     val position: GeoPoint?
         get() = if (willShowOnMap()) {
