@@ -12,8 +12,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val userViewModel by viewModels<UserViewModel>()
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         this.userViewModel.userLoggedIn.observeEvent(this@LoginActivity, {

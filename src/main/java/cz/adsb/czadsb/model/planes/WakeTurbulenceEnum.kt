@@ -1,6 +1,6 @@
 package cz.adsb.czadsb.model.planes
 
-enum class WakeTurbulenceEnum(val turb: Int) {
+enum class WakeTurbulenceEnum(val turbulence: Int) {
     None(0),
     Light(1),
     Medium(2),

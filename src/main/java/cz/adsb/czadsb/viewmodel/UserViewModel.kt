@@ -24,11 +24,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         get() = this._userLoggedIn
 
     init {
-        this._userLoggedIn.value = Event(this.authenticator.isUserLoggedIn());
+        this._userLoggedIn.value = Event(this.authenticator.isUserLoggedIn())
     }
 
-    fun performLogin(returnActivity: Activity)
-    {
+    fun performLogin(returnActivity: Activity) {
         this.authenticator.login(returnActivity, object : AuthCallback {
             override fun onFailure(dialog: Dialog) {
                 this@UserViewModel._userLoggedIn.postValue(Event(false))
@@ -46,13 +45,13 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun performLogout(returnActivity: Activity)
-    {
+    fun performLogout(returnActivity: Activity) {
         this.authenticator.logout(returnActivity, object : VoidCallback {
             override fun onSuccess(payload: Void?) {
                 this@UserViewModel.authenticator.deleteUserCredentials()
                 this@UserViewModel._userLoggedIn.postValue(Event(false))
             }
+
             override fun onFailure(error: Auth0Exception) {
                 this@UserViewModel._userLoggedIn.postValue(Event(true))
                 // TODO Show error to user

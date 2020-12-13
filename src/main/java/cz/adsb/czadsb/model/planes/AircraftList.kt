@@ -17,7 +17,7 @@ data class AircraftList(
     val lastDv: String = "",
     val shtTrlSec: Number = 0,
     val stm: Number = 0
-    ) {
+) {
 
     val aircrafts: MutableMap<Number, Aircraft>
         get() {
@@ -31,7 +31,8 @@ data class AircraftList(
         }
 
     class Deserializer : ResponseDeserializable<AircraftList> {
-        override fun deserialize(content: String): AircraftList = Gson().fromJson(content, AircraftList::class.java)
+        override fun deserialize(content: String): AircraftList =
+            Gson().fromJson(content, AircraftList::class.java)
     }
 
     override fun equals(other: Any?): Boolean {

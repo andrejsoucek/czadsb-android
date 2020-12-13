@@ -12,15 +12,12 @@ class AircraftLabel(
     mapView: MapView?,
     private val callsign: String?,
     private val registration: String?
-) : InfoWindow(layoutResId, mapView)
-{
-    override fun open(item: Any, position: GeoPoint, offsetX: Int, offsetY: Int)
-    {
+) : InfoWindow(layoutResId, mapView) {
+    override fun open(item: Any, position: GeoPoint, offsetX: Int, offsetY: Int) {
         super.open(item, (item as Marker).position, 0, 80)
     }
 
-    override fun onOpen(item: Any?)
-    {
+    override fun onOpen(item: Any?) {
         mView.reg_label_tv.text = registration
         if (callsign != null) {
             mView.callsign_label_tv.text = callsign
@@ -29,8 +26,7 @@ class AircraftLabel(
         }
     }
 
-    override fun onClose()
-    {
+    override fun onClose() {
         //do nothing
     }
 }

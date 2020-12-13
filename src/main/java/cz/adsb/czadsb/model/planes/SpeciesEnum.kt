@@ -1,6 +1,6 @@
 package cz.adsb.czadsb.model.planes
 
-enum class SpeciesEnum(val spec: Int){
+enum class SpeciesEnum(val spec: Int) {
     NONE(0),
     LAND_PLANE(1),
     SEA_PLANE(2),
