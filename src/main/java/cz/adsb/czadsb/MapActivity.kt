@@ -192,56 +192,56 @@ class MapActivity : AppCompatActivity() {
     private fun observeAircraftList(map: MapView)
     {
         this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
-            lifecycleScope.launch {
-                val aircraftList = this@MapActivity.aircraftListViewModel.refreshAircraftList(
-                    map.boundingBox.latNorth,
-                    map.boundingBox.latSouth,
-                    map.boundingBox.lonWest,
-                    map.boundingBox.lonEast
-                )
-                val updatedAircrafts = aircraftList.aircrafts
-                val currentAircraftsMap: Map<Number, AircraftMarker> = this@MapActivity.markersOverlay.items.associateBy {
-                    (it as AircraftMarker).getAircraftId()
-                } as Map<Number, AircraftMarker>
-                updatedAircrafts.forEach {
-                    if (it.value.willShowOnMap()) {
-                        if (currentAircraftsMap.containsKey(it.value.id)) {
-                            val marker = currentAircraftsMap[it.key] ?: error("Marker not found!")
-                            marker.position = it.value.position
-                            marker.rotation = it.value.hdg?.toFloat()?.times(-1) ?: 0f
-                            marker.infoWindow.draw()
-                        } else {
-                            val marker = AircraftMarker.create(map, it.value)
-                            this@MapActivity.markersOverlay.add(marker)
-                                marker.setOnMarkerClickListener { _, _ ->
-                                    this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = it.value
-                                    return@setOnMarkerClickListener false
-                                }
-                            marker.showInfoWindow()
+            this@MapActivity.aircraftListViewModel.refreshAircraftList(
+                map.boundingBox.latNorth,
+                map.boundingBox.latSouth,
+                map.boundingBox.lonWest,
+                map.boundingBox.lonEast
+            )
+        })
+        this.aircraftListViewModel.aircraftList.observe(this@MapActivity, { aircraftList ->
+            val updatedAircrafts = aircraftList.aircrafts
+            val currentAircraftsMap: Map<Number, AircraftMarker> = this@MapActivity.markersOverlay.items.associateBy {
+                (it as AircraftMarker).getAircraftId()
+            } as Map<Number, AircraftMarker>
+            updatedAircrafts.forEach {
+                if (it.value.willShowOnMap()) {
+                    if (currentAircraftsMap.containsKey(it.value.id)) {
+                        val marker = currentAircraftsMap[it.key] ?: error("Marker not found!")
+                        marker.position = it.value.position
+                        marker.rotation = it.value.hdg?.toFloat()?.times(-1) ?: 0f
+                        marker.infoWindow.draw()
+                    } else {
+                        val marker = AircraftMarker.create(map, it.value)
+                        this@MapActivity.markersOverlay.add(marker)
+                        marker.setOnMarkerClickListener { _, _ ->
+                            this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = it.value
+                            return@setOnMarkerClickListener false
                         }
+                        marker.showInfoWindow()
                     }
                 }
-                val toDelete = currentAircraftsMap.keys.minus(aircraftList.aircrafts.keys)
-                toDelete.forEach {
-                    if (it == this@MapActivity.aircraftInfoViewModel.selectedAircraft.value?.id) {
-                        return@forEach
-                    }
-                    val marker = currentAircraftsMap[it]
-                    marker?.closeInfoWindow()
-                    markersOverlay.items.remove(marker)
-                }
-
-                val selectedAircraft = this@MapActivity.aircraftInfoViewModel.selectedAircraft.value
-                if (selectedAircraft != null && updatedAircrafts[selectedAircraft.id] != null) {
-                    val upToDateSelectedAircraft = updatedAircrafts[selectedAircraft.id]!!
-                    map.controller.animateTo(upToDateSelectedAircraft.position)
-                    altTV.text = if (upToDateSelectedAircraft.onGround == true) "GND" else upToDateSelectedAircraft.amslAlt.toAltitude()
-                    speedTV.text = upToDateSelectedAircraft.spd.toSpeed()
-                    headingTV.text = upToDateSelectedAircraft.hdg.toHeading()
-                    squawkTV.text = upToDateSelectedAircraft.squawk ?: "N/A"
-                }
-                map.invalidate()
             }
+            val toDelete = currentAircraftsMap.keys.minus(aircraftList.aircrafts.keys)
+            toDelete.forEach {
+                if (it == this@MapActivity.aircraftInfoViewModel.selectedAircraft.value?.id) {
+                    return@forEach
+                }
+                val marker = currentAircraftsMap[it]
+                marker?.closeInfoWindow()
+                markersOverlay.items.remove(marker)
+            }
+
+            val selectedAircraft = this@MapActivity.aircraftInfoViewModel.selectedAircraft.value
+            if (selectedAircraft != null && updatedAircrafts[selectedAircraft.id] != null) {
+                val upToDateSelectedAircraft = updatedAircrafts[selectedAircraft.id]!!
+                map.controller.animateTo(upToDateSelectedAircraft.position)
+                altTV.text = if (upToDateSelectedAircraft.onGround == true) "GND" else upToDateSelectedAircraft.amslAlt.toAltitude()
+                speedTV.text = upToDateSelectedAircraft.spd.toSpeed()
+                headingTV.text = upToDateSelectedAircraft.hdg.toHeading()
+                squawkTV.text = upToDateSelectedAircraft.squawk ?: "N/A"
+            }
+            map.invalidate()
         })
     }
 }

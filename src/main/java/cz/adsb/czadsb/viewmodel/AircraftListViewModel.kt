@@ -20,7 +20,7 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
 
     val event = MutableLiveData<Event<Unit>>()
 
-    var lastDv = ""
+    val aircraftList = MutableLiveData<AircraftList>()
 
     private val timer = timer(
         "fetch_planes",
@@ -38,18 +38,17 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
         application.applicationContext.getProperty("aircraftlist_url")
     ) //@TODO DI
 
-    suspend fun refreshAircraftList(north: Double, south: Double, west: Double, east: Double): AircraftList
+    fun refreshAircraftList(north: Double, south: Double, west: Double, east: Double)
     {
-       val aircraftList = this@AircraftListViewModel.api.fetch(
-           this.lastDv,
-           north,
-           south,
-           west,
-           east
-       )
-        this.lastDv = aircraftList.lastDv
-
-        return aircraftList
+        viewModelScope.launch {
+            this@AircraftListViewModel.aircraftList.value = this@AircraftListViewModel.api.fetch(
+                aircraftList.value?.lastDv ?: "",
+                north,
+                south,
+                west,
+                east
+            )
+        }
     }
 
     private fun getRefreshRate(ctx: Context): Long
