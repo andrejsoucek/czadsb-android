@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.Auth0
@@ -22,6 +23,11 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
 
     val aircraftList = MutableLiveData<AircraftList>()
 
+    val error: LiveData<String>
+        get() = this._error
+
+    private val _error = MutableLiveData<String>()
+
     private val timer = timer(
         "fetch_planes",
         false,
@@ -38,27 +44,35 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
         application.applicationContext.getProperty("aircraftlist_url")
     ) //@TODO DI
 
-    fun refreshAircraftList(north: Double, south: Double, west: Double, east: Double)
-    {
+    fun refreshAircraftList(north: Double, south: Double, west: Double, east: Double) {
         viewModelScope.launch {
-            this@AircraftListViewModel.aircraftList.value = this@AircraftListViewModel.api.fetch(
-                aircraftList.value?.lastDv ?: "",
-                north,
-                south,
-                west,
-                east
-            )
+            try {
+                this@AircraftListViewModel.aircraftList.value =
+                    this@AircraftListViewModel.api.fetch(
+                        aircraftList.value?.lastDv ?: "",
+                        north,
+                        south,
+                        west,
+                        east
+                    )
+            } catch (e: Exception) {
+                this@AircraftListViewModel._error.value = e.message
+                this@AircraftListViewModel.cancelTimer()
+            }
         }
     }
 
-    private fun getRefreshRate(ctx: Context): Long
-    {
+    private fun getRefreshRate(ctx: Context): Long {
         return ctx.getProperty("refresh_rate").toLong()
+    }
+
+    private fun cancelTimer() {
+        this.timer.cancel()
+        this.timer.purge()
     }
 
     override fun onCleared() {
         super.onCleared()
-        this.timer.cancel()
-        this.timer.purge()
+        this.cancelTimer()
     }
 }

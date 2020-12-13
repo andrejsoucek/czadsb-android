@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import cz.adsb.czadsb.model.planes.AircraftMarker
@@ -22,7 +22,6 @@ import kotlinx.android.synthetic.main.aircraft_info.*
 import kotlinx.android.synthetic.main.aircraft_info_full.*
 import kotlinx.android.synthetic.main.aircraft_info_peek.*
 import kotlinx.android.synthetic.main.floating_menu.*
-import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -43,8 +42,7 @@ class MapActivity : AppCompatActivity() {
 
     private val markersOverlay = FolderOverlay()
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         this.userViewModel.userLoggedIn.observeEvent(this@MapActivity, {
@@ -57,11 +55,13 @@ class MapActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_map)
 
-        ActivityCompat.requestPermissions(this,
+        ActivityCompat.requestPermissions(
+            this,
             arrayOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            ), 1)
+            ), 1
+        )
 
         initActionMenu()
         val map = initMap()
@@ -81,8 +81,7 @@ class MapActivity : AppCompatActivity() {
         map.onPause()
     }
 
-    private fun initActionMenu()
-    {
+    private fun initActionMenu() {
         login_button.setOnClickListener {
             this.userViewModel.performLogout(this@MapActivity)
         }
@@ -94,14 +93,16 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    private fun initMap(): MapView
-    {
-        Configuration.getInstance().load(this.applicationContext, PreferenceManager.getDefaultSharedPreferences(this.applicationContext));
+    private fun initMap(): MapView {
+        Configuration.getInstance().load(
+            this.applicationContext,
+            PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+        )
         Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
 
-        val defaultMapCenter = GeoPoint(50.0755381, 14.4378005);
+        val defaultMapCenter = GeoPoint(50.0755381, 14.4378005)
         map.setTileSource(TileSourceFactory.MAPNIK)
-        map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER);
+        map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
@@ -109,7 +110,7 @@ class MapActivity : AppCompatActivity() {
         mapController.setZoom(9.0)
 
         map.overlays.add(this.markersOverlay)
-        map.overlays.add(MapEventsOverlay(object: MapEventsReceiver {
+        map.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                 if (floating_action_menu.isOpened) {
                     floating_action_menu.close(true)
@@ -126,38 +127,37 @@ class MapActivity : AppCompatActivity() {
         return map
     }
 
-    private fun initBottomSheet(): BottomSheetBehavior<LinearLayout>
-    {
+    private fun initBottomSheet(): BottomSheetBehavior<LinearLayout> {
         val bSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
         bSheetBehavior.isHideable = true
         bSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        bSheetBehavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
-        override fun onStateChanged(bottomSheet: View, newState: Int) {
-            when (newState) {
-                BottomSheetBehavior.STATE_COLLAPSED -> {
-                    map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                }
-                BottomSheetBehavior.STATE_EXPANDED -> {
-                    if (map.layoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT) {
-                        map.layoutParams.height = map.height - bottom_sheet.height
+        bSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                     }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        if (map.layoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                            map.layoutParams.height = map.height - bottom_sheet.height
+                        }
+                    }
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                        this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = null
+                    }
+                    else -> return
                 }
-                BottomSheetBehavior.STATE_HIDDEN -> {
-                    map.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                    this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = null
-                }
+                map.requestLayout()
             }
-            map.requestLayout()
-        }
 
-        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
             }
         })
         return bSheetBehavior
     }
 
-    private fun observeAircraftInfo(bs: BottomSheetBehavior<LinearLayout>)
-    {
+    private fun observeAircraftInfo(bs: BottomSheetBehavior<LinearLayout>) {
         this.aircraftInfoViewModel.selectedAircraft.observe(this@MapActivity, {
             if (it != null) {
                 map.controller.animateTo(it.position)
@@ -175,7 +175,7 @@ class MapActivity : AppCompatActivity() {
             }
         })
         this.aircraftInfoViewModel.state.observe(this@MapActivity, {
-            when(it) {
+            when (it) {
                 AircraftInfoViewModel.State.PEEKING -> {
                     bs.state = BottomSheetBehavior.STATE_COLLAPSED
                 }
@@ -185,25 +185,30 @@ class MapActivity : AppCompatActivity() {
                 AircraftInfoViewModel.State.HIDDEN -> {
                     bs.state = BottomSheetBehavior.STATE_HIDDEN
                 }
+                else -> return@observe
             }
         })
     }
 
-    private fun observeAircraftList(map: MapView)
-    {
+    private fun observeAircraftList(map: MapView) {
         this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
-            this@MapActivity.aircraftListViewModel.refreshAircraftList(
-                map.boundingBox.latNorth,
-                map.boundingBox.latSouth,
-                map.boundingBox.lonWest,
-                map.boundingBox.lonEast
-            )
+            try {
+                this@MapActivity.aircraftListViewModel.refreshAircraftList(
+                    map.boundingBox.latNorth,
+                    map.boundingBox.latSouth,
+                    map.boundingBox.lonWest,
+                    map.boundingBox.lonEast
+                )
+            } catch (e: Exception) {
+                Toast.makeText(applicationContext, e.message, Toast.LENGTH_LONG).show();
+            }
         })
         this.aircraftListViewModel.aircraftList.observe(this@MapActivity, { aircraftList ->
             val updatedAircrafts = aircraftList.aircrafts
-            val currentAircraftsMap: Map<Number, AircraftMarker> = this@MapActivity.markersOverlay.items.associateBy {
-                (it as AircraftMarker).getAircraftId()
-            } as Map<Number, AircraftMarker>
+            val currentAircraftsMap: Map<Number, AircraftMarker> =
+                this@MapActivity.markersOverlay.items.associateBy {
+                    (it as AircraftMarker).getAircraftId()
+                } as Map<Number, AircraftMarker>
             updatedAircrafts.forEach {
                 if (it.value.willShowOnMap()) {
                     if (currentAircraftsMap.containsKey(it.value.id)) {
@@ -236,12 +241,16 @@ class MapActivity : AppCompatActivity() {
             if (selectedAircraft != null && updatedAircrafts[selectedAircraft.id] != null) {
                 val upToDateSelectedAircraft = updatedAircrafts[selectedAircraft.id]!!
                 map.controller.animateTo(upToDateSelectedAircraft.position)
-                altTV.text = if (upToDateSelectedAircraft.onGround == true) "GND" else upToDateSelectedAircraft.amslAlt.toAltitude()
+                altTV.text =
+                    if (upToDateSelectedAircraft.onGround == true) "GND" else upToDateSelectedAircraft.amslAlt.toAltitude()
                 speedTV.text = upToDateSelectedAircraft.spd.toSpeed()
                 headingTV.text = upToDateSelectedAircraft.hdg.toHeading()
                 squawkTV.text = upToDateSelectedAircraft.squawk ?: "N/A"
             }
             map.invalidate()
+        })
+        this.aircraftListViewModel.error.observe(this@MapActivity, {
+            Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
         })
     }
 }
