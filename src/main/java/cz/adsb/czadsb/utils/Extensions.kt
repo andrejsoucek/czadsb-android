@@ -2,6 +2,8 @@ package cz.adsb.czadsb.utils
 
 import android.content.Context
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import cz.adsb.czadsb.R
 import java.util.*
@@ -86,3 +88,10 @@ fun BottomSheetBehavior<View>.isHidden() : Boolean = this.state == BottomSheetBe
 fun BottomSheetBehavior<View>.isCollapsed() : Boolean = this.state == BottomSheetBehavior.STATE_COLLAPSED
 
 fun BottomSheetBehavior<View>.isExpanded() : Boolean = this.state == BottomSheetBehavior.STATE_EXPANDED
+
+/****** Observer *******/
+fun <V, E : Event<V>> LiveData<E>.observeEvent(lifecycleOwner: LifecycleOwner, observer: (V) -> Unit) {
+    observe(lifecycleOwner) { event ->
+        event.getContentIfNotHandled()?.let { observer(it) }
+    }
+}

@@ -1,4 +1,4 @@
-package cz.adsb.czadsb.model
+package cz.adsb.czadsb.model.planes
 
 import com.google.gson.annotations.SerializedName
 import org.osmdroid.util.GeoPoint

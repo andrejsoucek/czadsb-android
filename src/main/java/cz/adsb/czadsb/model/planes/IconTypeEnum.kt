@@ -1,4 +1,4 @@
-package cz.adsb.czadsb.model
+package cz.adsb.czadsb.model.planes
 
 enum class IconTypeEnum(val iconName: String) {
     A380("type_a380"),

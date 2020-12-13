@@ -1,4 +1,4 @@
-package cz.adsb.czadsb.model
+package cz.adsb.czadsb.model.planes
 
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson

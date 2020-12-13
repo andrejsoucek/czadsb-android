@@ -10,8 +10,9 @@ class SplashActivity : AppCompatActivity() {
     {
         super.onCreate(savedInstanceState)
 
-        val intent = Intent(this, MapActivity::class.java)
+        val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
+        overridePendingTransition(0, 0)
         finish()
     }
 }

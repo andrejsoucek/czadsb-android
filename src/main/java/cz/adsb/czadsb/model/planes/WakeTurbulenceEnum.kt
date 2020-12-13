@@ -1,4 +1,4 @@
-package cz.adsb.czadsb.model
+package cz.adsb.czadsb.model.planes
 
 enum class WakeTurbulenceEnum(val turb: Int) {
     None(0),

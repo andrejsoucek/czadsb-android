@@ -1,4 +1,4 @@
-package cz.adsb.czadsb.model
+package cz.adsb.czadsb.model.planes
 
 enum class EnginePlacementEnum(val placement: Int) {
     UNKNOWN(0),
