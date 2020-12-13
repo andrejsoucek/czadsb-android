@@ -1,19 +1,28 @@
 package cz.adsb.czadsb.utils
 
 import android.content.Context
-import android.view.View
+import android.content.res.Resources
+import android.graphics.drawable.Drawable
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import cz.adsb.czadsb.R
 import java.util.*
 
 /****** Context *********/
-fun Context.getDrawableIdByName(resName: String) : Int {
+fun Context.getDrawableByName(resName: String): Drawable? {
     return try {
-        this.resources.getIdentifier("marker_${resName}", "drawable", packageName)
-    } catch (e: Exception) {
-        R.drawable.marker_generic
+        ResourcesCompat.getDrawable(
+            this.resources,
+            this.resources.getIdentifier("marker_${resName}", "drawable", this.packageName),
+            null
+        )
+    } catch (e: Resources.NotFoundException) {
+        ResourcesCompat.getDrawable(
+            this.resources,
+            R.drawable.marker_generic,
+            null
+        )
     }
 }
 
@@ -49,48 +58,32 @@ fun String?.concatenate(add: String?, separator: String = ""): String? {
     }
 }
 
-fun Number?.toAltitude() : String {
+fun Number?.toAltitude(): String {
     if (this == null) {
         return "N/A"
     }
-    return this.toString() + " ft"
+    return "$this ft"
 }
 
-fun Number?.toHeading() : String {
+fun Number?.toHeading(): String {
     if (this == null) {
         return "N/A"
     }
-    return this.toString() + "°"
+    return "$this°"
 }
 
-fun Number?.toSpeed() : String {
+fun Number?.toSpeed(): String {
     if (this == null) {
         return "N/A"
     }
-    return this.toString() + " km/h"
+    return "$this km/h"
 }
-
-/****** Bottom sheet states *********/
-fun BottomSheetBehavior<View>.hide() {
-    this.state = BottomSheetBehavior.STATE_HIDDEN
-}
-
-fun BottomSheetBehavior<View>.collapse() {
-    this.state = BottomSheetBehavior.STATE_COLLAPSED
-}
-
-fun BottomSheetBehavior<View>.expand() {
-    this.state = BottomSheetBehavior.STATE_EXPANDED
-}
-
-fun BottomSheetBehavior<View>.isHidden() : Boolean = this.state == BottomSheetBehavior.STATE_HIDDEN
-
-fun BottomSheetBehavior<View>.isCollapsed() : Boolean = this.state == BottomSheetBehavior.STATE_COLLAPSED
-
-fun BottomSheetBehavior<View>.isExpanded() : Boolean = this.state == BottomSheetBehavior.STATE_EXPANDED
 
 /****** Observer *******/
-fun <V, E : Event<V>> LiveData<E>.observeEvent(lifecycleOwner: LifecycleOwner, observer: (V) -> Unit) {
+fun <V, E : Event<V>> LiveData<E>.observeEvent(
+    lifecycleOwner: LifecycleOwner,
+    observer: (V) -> Unit
+) {
     observe(lifecycleOwner) { event ->
         event.getContentIfNotHandled()?.let { observer(it) }
     }
