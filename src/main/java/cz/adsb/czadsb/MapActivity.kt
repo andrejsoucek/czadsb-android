@@ -208,10 +208,7 @@ class MapActivity : AppCompatActivity() {
                         if (currentAircraftsMap.containsKey(it.value.id)) {
                             val marker = currentAircraftsMap[it.key] ?: error("Marker not found!")
                             marker.position = it.value.position
-                            // do not rotate balloon icon
-                            if (!(it.value.type == "BALL" || it.value.type == "RADAR")) {
-                                marker.rotation = it.value.hdg?.toFloat()?.times(-1) ?: 0f
-                            }
+                            marker.rotation = it.value.hdg?.toFloat()?.times(-1) ?: 0f
                             marker.infoWindow.draw()
                         } else {
                             val marker = AircraftMarker.create(map, it.value)
