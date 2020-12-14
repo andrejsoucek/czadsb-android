@@ -29,7 +29,7 @@ class PlanesAPI(
     }
 
     private fun fetchFull(north: Double, south: Double, west: Double, east: Double): AircraftList {
-        val request = Fuel.post("${this.url}?fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
+        val request = Fuel.post("${this.url}?trFmt=f&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
             .appendHeader("Authorization", "Bearer ${this.authenticator.getAccessToken()}")
         val (_, _, result) = request.responseObject(AircraftList.Deserializer())
         when (result) {
@@ -50,7 +50,7 @@ class PlanesAPI(
         east: Double
     ): AircraftList {
         val request =
-            Fuel.post("${this.url}?ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
+            Fuel.post("${this.url}?trFmt=f&ldv=$ldv&fNbnd=$north&fSBnd=$south&fWbnd=$west&fEBnd=$east")
                 .appendHeader("Authorization", "Bearer ${this.authenticator.getAccessToken()}")
         val (_, _, result) = request.responseObject(AircraftList.Deserializer())
         when (result) {

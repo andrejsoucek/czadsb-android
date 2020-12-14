@@ -52,12 +52,35 @@ data class Aircraft(
     @SerializedName("SpdTyp") val speedType: Number?,
     @SerializedName("CallSus") val invalidCallsign: Boolean?,
     @SerializedName("Trt") val transponderType: Number?,
-    @SerializedName("Year") val manufactured: String?
+    @SerializedName("Year") val manufactured: String?,
+    @SerializedName("Cot") val track: Array<Number?>?
 ) {
     val position: GeoPoint?
         get() = if (willShowOnMap()) {
             GeoPoint(lat!!.toDouble(), long!!.toDouble(), amslAlt!!.toDouble())
         } else null
+
+    val trackPoints: MutableList<GeoPoint>
+        get() {
+            var lat: Double? = null
+            var lon: Double? = null
+            val ret = mutableListOf<GeoPoint>()
+            this.track?.forEachIndexed { index, number ->
+                if (index % 3 == 0) {
+                    lat = number?.toDouble()
+                }
+                if (index % 3 == 1) {
+                    lon = number?.toDouble()
+                }
+                if (index % 3 == 2) {
+                    if (lat == null || lon == null) {
+                        return@forEachIndexed
+                    }
+                    ret.add(GeoPoint(lat!!, lon!!))
+                }
+            }
+            return ret
+        }
 
     val iconName: String
         get() {

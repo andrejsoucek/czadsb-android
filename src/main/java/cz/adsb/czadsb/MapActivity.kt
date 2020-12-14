@@ -2,6 +2,7 @@ package cz.adsb.czadsb
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,7 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.views.overlay.Polyline
 import java.util.*
 
 class MapActivity : AppCompatActivity() {
@@ -41,6 +43,8 @@ class MapActivity : AppCompatActivity() {
     private val aircraftListViewModel by viewModels<AircraftListViewModel>()
 
     private val markersOverlay = FolderOverlay()
+
+    private val path = Polyline()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +113,10 @@ class MapActivity : AppCompatActivity() {
         mapController.setCenter(defaultMapCenter)
         mapController.setZoom(9.0)
 
+        this.path.color = Color.MAGENTA
+        this.path.width = 4.0f
+
+        map.overlays.add(this.path)
         map.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                 if (floating_action_menu.isOpened) {
@@ -170,9 +178,14 @@ class MapActivity : AppCompatActivity() {
                 modelTV.text = it.model ?: getString(R.string.unknown_aircraft)
                 icaoTV.text = it.icao ?: "N/A"
                 this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.PEEKING
+                this.aircraftInfoViewModel.track.value = it.trackPoints.plus(it.position!!)
             } else {
                 this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.HIDDEN
+                this.aircraftInfoViewModel.track.value = listOf()
             }
+        })
+        this.aircraftInfoViewModel.track.observe(this@MapActivity, {
+            this@MapActivity.path.setPoints(it)
         })
         this.aircraftInfoViewModel.state.observe(this@MapActivity, {
             when (it) {
@@ -246,6 +259,7 @@ class MapActivity : AppCompatActivity() {
                 speedTV.text = upToDateSelectedAircraft.spd.toSpeed()
                 headingTV.text = upToDateSelectedAircraft.hdg.toHeading()
                 squawkTV.text = upToDateSelectedAircraft.squawk ?: "N/A"
+                this.aircraftInfoViewModel.track.value = upToDateSelectedAircraft.trackPoints
             }
             map.invalidate()
         })
