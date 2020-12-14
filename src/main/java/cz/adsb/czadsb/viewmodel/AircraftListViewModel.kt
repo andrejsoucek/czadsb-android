@@ -23,10 +23,10 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
 
     val aircraftList = MutableLiveData<AircraftList>()
 
-    val error: LiveData<String>
+    val error: LiveData<Exception>
         get() = this._error
 
-    private val _error = MutableLiveData<String>()
+    private val _error = MutableLiveData<Exception>()
 
     private val timer = timer(
         "fetch_planes",
@@ -56,7 +56,7 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
                         east
                     )
             } catch (e: Exception) {
-                this@AircraftListViewModel._error.value = e.message
+                this@AircraftListViewModel._error.value = e
                 this@AircraftListViewModel.cancelTimer()
             }
         }

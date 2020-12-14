@@ -3,9 +3,11 @@ package cz.adsb.czadsb.model.api
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
 import cz.adsb.czadsb.model.planes.AircraftList
+import cz.adsb.czadsb.model.user.AuthenticationException
 import cz.adsb.czadsb.model.user.Authenticator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 class PlanesAPI(
     private val authenticator: Authenticator,
@@ -37,6 +39,9 @@ class PlanesAPI(
                 return result.get()
             }
             is Result.Failure -> {
+                if (result.getException().response.statusCode == 401) {
+                    throw AuthenticationException()
+                }
                 throw result.getException()
             }
         }
@@ -58,6 +63,9 @@ class PlanesAPI(
                 return result.get()
             }
             is Result.Failure -> {
+                if (result.getException().response.statusCode == 401) {
+                    throw AuthenticationException()
+                }
                 throw result.getException()
             }
         }

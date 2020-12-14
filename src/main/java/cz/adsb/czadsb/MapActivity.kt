@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.squareup.picasso.Picasso
 import cz.adsb.czadsb.model.planes.AircraftMarker
+import cz.adsb.czadsb.model.user.AuthenticationException
 import cz.adsb.czadsb.utils.*
 import cz.adsb.czadsb.viewmodel.AircraftInfoViewModel
 import cz.adsb.czadsb.viewmodel.AircraftListViewModel
@@ -28,6 +29,7 @@ import kotlinx.android.synthetic.main.floating_menu.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -52,13 +54,7 @@ class MapActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.userViewModel.userLoggedIn.observeEvent(this@MapActivity, {
-            if (!it) {
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
-        })
+        this.observeUser()
 
         setContentView(R.layout.activity_map)
 
@@ -70,12 +66,14 @@ class MapActivity : AppCompatActivity() {
             ), 1
         )
 
-        initActionMenu()
-        val map = initMap()
-        val bs = initBottomSheet()
+        this.initActionMenu()
+        val map = this.initMap()
+        val bs = this.initBottomSheet()
 
-        observeAircraftInfo(bs)
-        observeAircraftList(map)
+        this.observeAircraftInfo(bs)
+        map.addOnFirstLayoutListener { _, _, _, _, _ ->
+            this.observeAircraftList(map)
+        }
     }
 
     override fun onResume() {
@@ -88,15 +86,23 @@ class MapActivity : AppCompatActivity() {
         map.onPause()
     }
 
+    override fun onBackPressed() {
+        if (this.aircraftInfoViewModel.selectedAircraft.value == null && !floating_action_menu.isOpened) {
+            super.onBackPressed()
+        }
+        floating_action_menu.close(true)
+        this.aircraftInfoViewModel.selectedAircraft.value = null
+    }
+
     private fun initActionMenu() {
         login_button.setOnClickListener {
             this.userViewModel.performLogout(this@MapActivity)
         }
         filters_button.setOnClickListener {
-            //TODO
+            Toast.makeText(applicationContext, "NOT IMPLEMENTED YET!", Toast.LENGTH_SHORT).show()
         }
         preferences_button.setOnClickListener {
-            //TODO
+            Toast.makeText(applicationContext, "NOT IMPLEMENTED YET!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -122,9 +128,7 @@ class MapActivity : AppCompatActivity() {
         map.overlays.add(this.path)
         map.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                if (floating_action_menu.isOpened) {
-                    floating_action_menu.close(true)
-                }
+                floating_action_menu.close(true)
                 this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = null
                 return false
             }
@@ -226,18 +230,6 @@ class MapActivity : AppCompatActivity() {
     }
 
     private fun observeAircraftList(map: MapView) {
-        this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
-            try {
-                this@MapActivity.aircraftListViewModel.refreshAircraftList(
-                    map.boundingBox.latNorth,
-                    map.boundingBox.latSouth,
-                    map.boundingBox.lonWest,
-                    map.boundingBox.lonEast
-                )
-            } catch (e: Exception) {
-                Toast.makeText(applicationContext, e.message, Toast.LENGTH_LONG).show();
-            }
-        })
         this.aircraftListViewModel.aircraftList.observe(this@MapActivity, { aircraftList ->
             val updatedAircrafts = aircraftList.aircrafts
             val currentAircraftsMap: Map<Number, AircraftMarker> =
@@ -285,8 +277,39 @@ class MapActivity : AppCompatActivity() {
             }
             map.invalidate()
         })
-        this.aircraftListViewModel.error.observe(this@MapActivity, {
-            Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
+        this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
+            this.refreshAircraftList(map.boundingBox)
         })
+        this.aircraftListViewModel.error.observe(this@MapActivity, {
+            if (it is AuthenticationException) {
+                this.userViewModel.performLogout(this@MapActivity)
+                Toast.makeText(applicationContext, R.string.you_have_been_logged_out, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(applicationContext, it.message, Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun observeUser() {
+        this.userViewModel.userLoggedIn.observeEvent(this@MapActivity, {
+            if (!it) {
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        })
+    }
+
+    private fun refreshAircraftList(bb: BoundingBox) {
+        try {
+            this@MapActivity.aircraftListViewModel.refreshAircraftList(
+                bb.latNorth,
+                bb.latSouth,
+                bb.lonWest,
+                bb.lonEast
+            )
+        } catch (e: Exception) {
+            Toast.makeText(applicationContext, e.message, Toast.LENGTH_LONG).show();
+        }
     }
 }
