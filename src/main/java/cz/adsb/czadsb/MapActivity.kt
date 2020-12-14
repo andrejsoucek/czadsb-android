@@ -109,7 +109,6 @@ class MapActivity : AppCompatActivity() {
         mapController.setCenter(defaultMapCenter)
         mapController.setZoom(9.0)
 
-        map.overlays.add(this.markersOverlay)
         map.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                 if (floating_action_menu.isOpened) {
@@ -123,6 +122,7 @@ class MapActivity : AppCompatActivity() {
                 return true
             }
         }))
+        map.overlays.add(this.markersOverlay)
 
         return map
     }
@@ -221,7 +221,7 @@ class MapActivity : AppCompatActivity() {
                         this@MapActivity.markersOverlay.add(marker)
                         marker.setOnMarkerClickListener { _, _ ->
                             this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = it.value
-                            return@setOnMarkerClickListener false
+                            return@setOnMarkerClickListener true
                         }
                         marker.showInfoWindow()
                     }
