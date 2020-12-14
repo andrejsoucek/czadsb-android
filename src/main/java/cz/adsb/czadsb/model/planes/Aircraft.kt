@@ -93,11 +93,11 @@ data class Aircraft(
                 return IconTypeEnum.HELICOPTER_MEDICAL.iconName
             }
 
-            if (type == "CLEAN" || type == "CLEANER" || type == "TUG" || type == "SQB") {
+            if (type == "FLLME") {
                 return IconTypeEnum.CAR_FOLLOW_ME.iconName
             }
 
-            if (type == "SAFETY CAR" || type == "FLLME" || type == "ELECTRIC" || type == "BIRD" || type == "AD REPAIR" || type == "CAR") {
+            if (type == "CLEAN" || type == "CLEANER" || type == "TUG" || type == "SQB" || type == "SAFETY CAR" || type == "ELECTRIC" || type == "BIRD" || type == "AD REPAIR" || type == "CAR") {
                 return IconTypeEnum.CAR.iconName
             }
 
