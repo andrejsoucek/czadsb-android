@@ -23,7 +23,7 @@
         tools:text="Avions de Transport Regional ATR 42 500" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/plane_image"
         android:layout_width="150dp"
         android:layout_height="125dp"
         android:layout_marginStart="8dp"
@@ -31,7 +31,7 @@
         android:adjustViewBounds="false"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/modelTV"
-        app:srcCompat="@drawable/ic_image_white_24dp" />
+        app:srcCompat="@drawable/image_placeholder" />
 
     <TableLayout
         android:layout_width="wrap_content"

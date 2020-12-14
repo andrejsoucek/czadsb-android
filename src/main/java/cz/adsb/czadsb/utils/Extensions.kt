@@ -14,7 +14,7 @@ fun Context.getDrawableByName(resName: String): Drawable? {
     return try {
         ResourcesCompat.getDrawable(
             this.resources,
-            this.resources.getIdentifier("marker_${resName}", "drawable", this.packageName),
+            this.resources.getIdentifier(resName, "drawable", this.packageName),
             null
         )
     } catch (e: Resources.NotFoundException) {

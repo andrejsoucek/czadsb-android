@@ -20,7 +20,7 @@ class AircraftMarker(mapView: MapView, private val aircraft: Aircraft) : Marker(
     companion object Factory {
         fun create(map: MapView, aircraft: Aircraft): AircraftMarker {
             val marker = AircraftMarker(map, aircraft)
-            marker.icon = map.context.getDrawableByName(aircraft.iconName)
+            marker.icon = map.context.getDrawableByName("marker_${aircraft.iconName}")
             marker.setAnchor(ANCHOR_CENTER, ANCHOR_CENTER)
             marker.position = aircraft.position
             marker.isDraggable = false

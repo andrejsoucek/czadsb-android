@@ -3,6 +3,7 @@ package cz.adsb.czadsb
 import android.Manifest
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.squareup.picasso.Picasso
 import cz.adsb.czadsb.model.planes.AircraftMarker
 import cz.adsb.czadsb.utils.*
 import cz.adsb.czadsb.viewmodel.AircraftInfoViewModel
@@ -33,6 +35,7 @@ import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Polyline
 import java.util.*
+
 
 class MapActivity : AppCompatActivity() {
 
@@ -177,8 +180,11 @@ class MapActivity : AppCompatActivity() {
                 registration.text = it.registration ?: "Reg. N/A"
                 modelTV.text = it.model ?: getString(R.string.unknown_aircraft)
                 icaoTV.text = it.icao ?: "N/A"
+                plane_image.setImageDrawable(applicationContext.getDrawableByName("image_placeholder"))
+                plane_image.isClickable = false
                 this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.PEEKING
                 this.aircraftInfoViewModel.track.value = it.trackPoints.plus(it.position!!)
+                this.aircraftInfoViewModel.getImage(it.icao)
             } else {
                 this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.HIDDEN
                 this.aircraftInfoViewModel.track.value = listOf()
@@ -200,6 +206,22 @@ class MapActivity : AppCompatActivity() {
                 }
                 else -> return@observe
             }
+        })
+        this.aircraftInfoViewModel.image.observe(this@MapActivity, { image ->
+            if (image != null) {
+                Picasso.get().load(image.imageUrl).into(plane_image)
+                plane_image.isClickable = true
+                plane_image.setOnClickListener {
+                    val intent = Intent()
+                    intent.action = Intent.ACTION_VIEW
+                    intent.addCategory(Intent.CATEGORY_BROWSABLE)
+                    intent.data = Uri.parse(image.pageUrl)
+                    startActivity(intent)
+                }
+            }
+        })
+        this.aircraftInfoViewModel.error.observe(this@MapActivity, {
+            Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
         })
     }
 
