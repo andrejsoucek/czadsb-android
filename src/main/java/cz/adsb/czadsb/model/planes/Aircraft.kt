@@ -84,64 +84,38 @@ data class Aircraft(
 
     val iconName: String
         get() {
-            if (military == true && engineType == EngineTypeEnum.JET.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 4) {
-                return IconTypeEnum.WTC_HEAVY_MIL_4_JET.iconName
-            }
+            if (military == true) {
+                if (engineType == EngineTypeEnum.JET.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 4) {
+                    return IconTypeEnum.WTC_HEAVY_MIL_4_JET.iconName
+                }
 
-            if (military == true && engineType == EngineTypeEnum.TURBO.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 4) {
-                return IconTypeEnum.TURBO_PROP_MIL_4.iconName
-            }
+                if (engineType == EngineTypeEnum.TURBO.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 4) {
+                    return IconTypeEnum.TURBO_PROP_MIL_4.iconName
+                }
 
-            if (military == true && engineType == EngineTypeEnum.JET.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 2) {
-                return IconTypeEnum.WTC_HEAWY_MIL_2_JET.iconName
-            }
+                if (engineType == EngineTypeEnum.JET.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 2) {
+                    return IconTypeEnum.WTC_HEAWY_MIL_2_JET.iconName
+                }
 
-            if (military == true && engineType == EngineTypeEnum.TURBO.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 2) {
-                return IconTypeEnum.TURBO_PROP_MIL_2.iconName
-            }
+                if (engineType == EngineTypeEnum.TURBO.type && species != SpeciesEnum.HELICOPTER.spec && engines?.toInt() == 2) {
+                    return IconTypeEnum.TURBO_PROP_MIL_2.iconName
+                }
 
-            if (military == true && species == SpeciesEnum.HELICOPTER.spec) {
-                return IconTypeEnum.HELICOPTER_MILITARY.iconName
+                if (species == SpeciesEnum.HELICOPTER.spec) {
+                    return IconTypeEnum.HELICOPTER_MILITARY.iconName
+                }
+
+                if (engineType == EngineTypeEnum.JET.type && wakeTurbulenceCat == WakeTurbulenceEnum.Medium.turbulence && engines?.toInt() == 1) {
+                    return IconTypeEnum.F16.iconName
+                }
             }
 
             if (type == "RADAR") {
                 return IconTypeEnum.RADAR.iconName
             }
 
-            if (military == true && engineType == EngineTypeEnum.JET.type && wakeTurbulenceCat == WakeTurbulenceEnum.Medium.turbulence && engines?.toInt() == 1) {
-                return IconTypeEnum.F16.iconName
-            }
-
-            if (squawk == "0045" || squawk == "0046" || squawk == "0047" || squawk == "0020") {
-                return IconTypeEnum.HELICOPTER_MEDICAL.iconName
-            }
-
-            if (type == "FLLME") {
-                return IconTypeEnum.CAR_FOLLOW_ME.iconName
-            }
-
-            if (type == "CLEAN" || type == "CLEANER" || type == "TUG" || type == "SQB" || type == "SAFETY CAR" || type == "ELECTRIC" || type == "BIRD" || type == "AD REPAIR" || type == "CAR") {
-                return IconTypeEnum.CAR.iconName
-            }
-
-            if (type == "FIRE") {
-                return IconTypeEnum.CAR_FIRE.iconName
-            }
-
-            if (type == "UFO") {
-                return IconTypeEnum.CAR_FIRE.iconName
-            }
-
-            if (species == SpeciesEnum.GROUND_VEHICLE.spec) {
-                return IconTypeEnum.GROUND_VEHICLE.iconName
-            }
-
-            if (species == SpeciesEnum.TOWER.spec) {
-                return IconTypeEnum.TOWER.iconName
-            }
-
-            if (species == SpeciesEnum.HELICOPTER.spec) {
-                return IconTypeEnum.HELICOPTER.iconName
+            if (type == "BALL") {
+                return IconTypeEnum.BALL.iconName
             }
 
             if (type == "GLID") {
@@ -160,12 +134,46 @@ data class Aircraft(
                 return IconTypeEnum.A340.iconName
             }
 
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Light.turbulence && engineType != EngineTypeEnum.JET.type && engines?.toInt() == 1) {
-                return IconTypeEnum.WTC_LIGHT_1_PROP.iconName
+            if (squawk == "0045" || squawk == "0046" || squawk == "0047" || squawk == "0020") {
+                return IconTypeEnum.HELICOPTER_MEDICAL.iconName
             }
 
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Light.turbulence && engineType != EngineTypeEnum.JET.type) {
-                return IconTypeEnum.WTC_LIGHT_2_PROP.iconName
+            if (type == "FLLME") {
+                return IconTypeEnum.CAR_FOLLOW_ME.iconName
+            }
+
+            if (listOf("CLEAN", "CLEANER", "TUG", "SQB", "SAFETY CAR", "ELECTRIC", "BIRD", "AD REPAIR", "CAR").contains(type)) {
+                return IconTypeEnum.CAR.iconName
+            }
+
+            if (type == "FIRE") {
+                return IconTypeEnum.CAR_FIRE.iconName
+            }
+
+            if (type == "UFO") {
+                return IconTypeEnum.UFO.iconName
+            }
+
+            if (species == SpeciesEnum.GROUND_VEHICLE.spec) {
+                return IconTypeEnum.GROUND_VEHICLE.iconName
+            }
+
+            if (species == SpeciesEnum.TOWER.spec) {
+                return IconTypeEnum.TOWER.iconName
+            }
+
+            if (species == SpeciesEnum.HELICOPTER.spec) {
+                return IconTypeEnum.HELICOPTER.iconName
+            }
+
+            if (wakeTurbulenceCat == WakeTurbulenceEnum.Light.turbulence) {
+                if (engineType != EngineTypeEnum.JET.type && engines?.toInt() == 1) {
+                    return IconTypeEnum.WTC_LIGHT_1_PROP.iconName
+                }
+
+                if (engineType != EngineTypeEnum.JET.type) {
+                    return IconTypeEnum.WTC_LIGHT_2_PROP.iconName
+                }
             }
 
             if (engineType == EngineTypeEnum.JET.type &&
@@ -175,32 +183,31 @@ data class Aircraft(
                 return IconTypeEnum.GLFX.iconName
             }
 
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Medium.turbulence && engines?.toInt() == 4 && engineType == EngineTypeEnum.JET.type) {
-                return IconTypeEnum.WTC_MEDIUM_4_JET.iconName
-            }
+            if (wakeTurbulenceCat == WakeTurbulenceEnum.Medium.turbulence) {
+                if (engines?.toInt() == 4 && engineType == EngineTypeEnum.JET.type) {
+                    return IconTypeEnum.WTC_MEDIUM_4_JET.iconName
+                }
 
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Medium.turbulence && engines?.toInt() != 4 && engineType == EngineTypeEnum.JET.type) {
-                return IconTypeEnum.WTC_MEDIUM_2_JET.iconName
-            }
+                if (engines?.toInt() != 4 && engineType == EngineTypeEnum.JET.type) {
+                    return IconTypeEnum.WTC_MEDIUM_2_JET.iconName
+                }
 
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Medium.turbulence && engines?.toInt() != 4) {
-                return IconTypeEnum.WTC_MEDIUM_2_TURBO.iconName
+                if (engines?.toInt() != 4) {
+                    return IconTypeEnum.WTC_MEDIUM_2_TURBO.iconName
+                }
             }
+            if (wakeTurbulenceCat == WakeTurbulenceEnum.Heavy.turbulence) {
+                if (engines?.toInt() == 4) {
+                    return IconTypeEnum.WTC_HEAVY_4_JET.iconName
+                }
 
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Heavy.turbulence && engines?.toInt() == 4) {
-                return IconTypeEnum.WTC_HEAVY_4_JET.iconName
-            }
-
-            if (wakeTurbulenceCat == WakeTurbulenceEnum.Heavy.turbulence && engines?.toInt() != 4) {
-                return IconTypeEnum.WTC_HEAVY_2_JET.iconName
+                if (engines?.toInt() != 4) {
+                    return IconTypeEnum.WTC_HEAVY_2_JET.iconName
+                }
             }
 
             if (engines?.toInt() == 4 && engineType == EngineTypeEnum.TURBO.type) {
                 return IconTypeEnum.TURBO_PROP_4.iconName
-            }
-
-            if (type == "BALL") {
-                return IconTypeEnum.BALL.iconName
             }
 
             return IconTypeEnum.AIRPLANE.iconName
