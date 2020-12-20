@@ -15,6 +15,9 @@ import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.squareup.picasso.Picasso
+import cz.adsb.czadsb.model.images.Image
+import cz.adsb.czadsb.model.planes.Aircraft
+import cz.adsb.czadsb.model.planes.AircraftList
 import cz.adsb.czadsb.model.planes.AircraftMarker
 import cz.adsb.czadsb.model.user.AuthenticationException
 import cz.adsb.czadsb.utils.*
@@ -174,55 +177,16 @@ class MapActivity : AppCompatActivity() {
 
     private fun observeAircraftInfo(bs: BottomSheetBehavior<LinearLayout>) {
         this.aircraftInfoViewModel.selectedAircraft.observe(this@MapActivity, {
-            if (it != null) {
-                map.controller.animateTo(it.position)
-                callsign.text = it.callsign
-                operator.text = it.operator
-                from.text = it.from?.firstChars(3) ?: "N/A"
-                to.text = it.to?.firstChars(3) ?: "N/A"
-                ac_type.text = it.manufacturer?.concatenate(it.type, " ") ?: "N/A"
-                registration.text = it.registration ?: "Reg. N/A"
-                modelTV.text = it.model ?: getString(R.string.unknown_aircraft)
-                icaoTV.text = it.icao ?: "N/A"
-                plane_image.setImageDrawable(applicationContext.getDrawableByName("image_placeholder"))
-                plane_image.isClickable = false
-                this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.PEEKING
-                this.aircraftInfoViewModel.track.value = it.trackPoints.plus(it.position!!)
-                this.aircraftInfoViewModel.getImage(it.icao)
-            } else {
-                this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.HIDDEN
-                this.aircraftInfoViewModel.track.value = listOf()
-            }
+            this.onSelectedAircraftChange(it)
         })
         this.aircraftInfoViewModel.track.observe(this@MapActivity, {
-            this@MapActivity.path.setPoints(it)
+            this.path.setPoints(it)
         })
         this.aircraftInfoViewModel.state.observe(this@MapActivity, {
-            when (it) {
-                AircraftInfoViewModel.State.PEEKING -> {
-                    bs.state = BottomSheetBehavior.STATE_COLLAPSED
-                }
-                AircraftInfoViewModel.State.OPEN -> {
-                    bs.state = BottomSheetBehavior.STATE_EXPANDED
-                }
-                AircraftInfoViewModel.State.HIDDEN -> {
-                    bs.state = BottomSheetBehavior.STATE_HIDDEN
-                }
-                else -> return@observe
-            }
+            this.onAircraftInfoStateChange(bs, it)
         })
-        this.aircraftInfoViewModel.image.observe(this@MapActivity, { image ->
-            if (image != null) {
-                Picasso.get().load(image.imageUrl).into(plane_image)
-                plane_image.isClickable = true
-                plane_image.setOnClickListener {
-                    val intent = Intent()
-                    intent.action = Intent.ACTION_VIEW
-                    intent.addCategory(Intent.CATEGORY_BROWSABLE)
-                    intent.data = Uri.parse(image.pageUrl)
-                    startActivity(intent)
-                }
-            }
+        this.aircraftInfoViewModel.image.observe(this@MapActivity, {
+            this.onAircraftImageChange(it)
         })
         this.aircraftInfoViewModel.error.observe(this@MapActivity, {
             Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
@@ -231,51 +195,7 @@ class MapActivity : AppCompatActivity() {
 
     private fun observeAircraftList(map: MapView) {
         this.aircraftListViewModel.aircraftList.observe(this@MapActivity, { aircraftList ->
-            val updatedAircrafts = aircraftList.aircrafts
-            val currentAircraftsMap: Map<Number, AircraftMarker> =
-                this@MapActivity.markersOverlay.items.associateBy {
-                    (it as AircraftMarker).getAircraftId()
-                } as Map<Number, AircraftMarker>
-            updatedAircrafts.forEach {
-                if (it.value.willShowOnMap()) {
-                    if (currentAircraftsMap.containsKey(it.value.id)) {
-                        val marker = currentAircraftsMap[it.key] ?: error("Marker not found!")
-                        marker.position = it.value.position
-                        marker.rotation = it.value.hdg?.toFloat()?.times(-1) ?: 0f
-                        marker.infoWindow.draw()
-                    } else {
-                        val marker = AircraftMarker.create(map, it.value)
-                        this@MapActivity.markersOverlay.add(marker)
-                        marker.setOnMarkerClickListener { _, _ ->
-                            this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = it.value
-                            return@setOnMarkerClickListener true
-                        }
-                        marker.showInfoWindow()
-                    }
-                }
-            }
-            val toDelete = currentAircraftsMap.keys.minus(aircraftList.aircrafts.keys)
-            toDelete.forEach {
-                if (it == this@MapActivity.aircraftInfoViewModel.selectedAircraft.value?.id) {
-                    return@forEach
-                }
-                val marker = currentAircraftsMap[it]
-                marker?.closeInfoWindow()
-                markersOverlay.items.remove(marker)
-            }
-
-            val selectedAircraft = this@MapActivity.aircraftInfoViewModel.selectedAircraft.value
-            if (selectedAircraft != null && updatedAircrafts[selectedAircraft.id] != null) {
-                val upToDateSelectedAircraft = updatedAircrafts[selectedAircraft.id]!!
-                map.controller.animateTo(upToDateSelectedAircraft.position)
-                altTV.text =
-                    if (upToDateSelectedAircraft.onGround == true) "GND" else upToDateSelectedAircraft.amslAlt.toAltitude()
-                speedTV.text = upToDateSelectedAircraft.spd.toSpeed()
-                headingTV.text = upToDateSelectedAircraft.hdg.toHeading()
-                squawkTV.text = upToDateSelectedAircraft.squawk ?: "N/A"
-                this.aircraftInfoViewModel.track.value = upToDateSelectedAircraft.trackPoints
-            }
-            map.invalidate()
+            this.onAircraftListChange(map, aircraftList)
         })
         this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
             this.refreshAircraftList(map.boundingBox)
@@ -309,7 +229,114 @@ class MapActivity : AppCompatActivity() {
                 bb.lonEast
             )
         } catch (e: Exception) {
-            Toast.makeText(applicationContext, e.message, Toast.LENGTH_LONG).show();
+            Toast.makeText(applicationContext, e.message, Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun onSelectedAircraftChange(aircraft: Aircraft?) {
+        if (aircraft != null) {
+            map.controller.animateTo(aircraft.position)
+            callsign.text = aircraft.callsign
+            operator.text = aircraft.operator
+            from.text = aircraft.from?.firstChars(3) ?: "N/A"
+            to.text = aircraft.to?.firstChars(3) ?: "N/A"
+            ac_type.text = aircraft.manufacturer?.concatenate(aircraft.type, " ") ?: "N/A"
+            registration.text = aircraft.registration ?: "Reg. N/A"
+            modelTV.text = aircraft.model ?: getString(R.string.unknown_aircraft)
+            icaoTV.text = aircraft.icao ?: "N/A"
+            plane_image.setImageDrawable(applicationContext.getDrawableByName("image_placeholder"))
+            plane_image.isClickable = false
+            this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.PEEKING
+            this.aircraftInfoViewModel.track.value = aircraft.trackPoints.plus(aircraft.position!!)
+            this.aircraftInfoViewModel.getImage(aircraft.icao)
+        } else {
+            this.aircraftInfoViewModel.state.value = AircraftInfoViewModel.State.HIDDEN
+            this.aircraftInfoViewModel.track.value = listOf()
+        }
+    }
+
+    private fun onAircraftInfoStateChange(bs: BottomSheetBehavior<LinearLayout>, state: AircraftInfoViewModel.State) {
+        when (state) {
+            AircraftInfoViewModel.State.PEEKING -> {
+                bs.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+            AircraftInfoViewModel.State.OPEN -> {
+                bs.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+            AircraftInfoViewModel.State.HIDDEN -> {
+                bs.state = BottomSheetBehavior.STATE_HIDDEN
+            }
+        }
+    }
+
+    private fun onAircraftImageChange(image: Image?) {
+        if (image != null) {
+            Picasso.get().load(image.imageUrl).into(plane_image)
+            plane_image.isClickable = true
+            plane_image.setOnClickListener {
+                val intent = Intent()
+                intent.action = Intent.ACTION_VIEW
+                intent.addCategory(Intent.CATEGORY_BROWSABLE)
+                intent.data = Uri.parse(image.pageUrl)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun onAircraftListChange(map: MapView, aircraftList: AircraftList) {
+        val updatedAircrafts = aircraftList.aircrafts
+        val currentAircraftsMap: Map<Number, AircraftMarker> =
+            this@MapActivity.markersOverlay.items.associateBy {
+                (it as AircraftMarker).getAircraftId()
+            } as Map<Number, AircraftMarker>
+
+        this.updateAircraftMarkers(updatedAircrafts, currentAircraftsMap)
+        this.deleteOldMarkers(updatedAircrafts, currentAircraftsMap)
+        this.updateSelectedAircraftInfo(updatedAircrafts)
+        map.invalidate()
+    }
+
+    private fun updateAircraftMarkers(new: MutableMap<Number, Aircraft>, current: Map<Number, AircraftMarker>) {
+        new.forEach {
+            if (it.value.willShowOnMap()) {
+                if (current.containsKey(it.value.id)) {
+                    val marker = current[it.key] ?: error("Marker not found!")
+                    marker.position = it.value.position
+                    marker.rotation = it.value.hdg?.toFloat()?.times(-1) ?: 0f
+                    marker.infoWindow.draw()
+                } else {
+                    val marker = AircraftMarker.create(map, it.value)
+                    this@MapActivity.markersOverlay.add(marker)
+                    marker.setOnMarkerClickListener { _, _ ->
+                        this@MapActivity.aircraftInfoViewModel.selectedAircraft.value = it.value
+                        return@setOnMarkerClickListener true
+                    }
+                    marker.showInfoWindow()
+                }
+            }
+        }
+    }
+
+    private fun deleteOldMarkers(new: MutableMap<Number, Aircraft>, current: Map<Number, AircraftMarker>) {
+        val toDelete = current.keys.minus(new.keys)
+        toDelete.forEach {
+            if (it == this@MapActivity.aircraftInfoViewModel.selectedAircraft.value?.id) {
+                return@forEach
+            }
+            val marker = current[it]
+            marker?.closeInfoWindow()
+            markersOverlay.items.remove(marker)
+        }
+    }
+
+    private fun updateSelectedAircraftInfo(new: MutableMap<Number, Aircraft>) {
+        val selectedAircraftId = this@MapActivity.aircraftInfoViewModel.selectedAircraft.value?.id ?: return
+        val upToDateSelectedAircraft = new[selectedAircraftId] ?: return
+        map.controller.animateTo(upToDateSelectedAircraft.position)
+        altTV.text = if (upToDateSelectedAircraft.onGround == true) "GND" else upToDateSelectedAircraft.amslAlt.toAltitude()
+        speedTV.text = upToDateSelectedAircraft.spd.toSpeed()
+        headingTV.text = upToDateSelectedAircraft.hdg.toHeading()
+        squawkTV.text = upToDateSelectedAircraft.squawk ?: "N/A"
+        this.aircraftInfoViewModel.track.value = upToDateSelectedAircraft.trackPoints
     }
 }
