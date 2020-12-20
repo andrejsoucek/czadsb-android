@@ -76,6 +76,7 @@ class MapActivity : AppCompatActivity() {
         this.observeAircraftInfo(bs)
         map.addOnFirstLayoutListener { _, _, _, _, _ ->
             this.observeAircraftList(map)
+            this.refreshAircraftList(map.boundingBox)
         }
     }
 
@@ -194,8 +195,8 @@ class MapActivity : AppCompatActivity() {
     }
 
     private fun observeAircraftList(map: MapView) {
-        this.aircraftListViewModel.aircraftList.observe(this@MapActivity, { aircraftList ->
-            this.onAircraftListChange(map, aircraftList)
+        this.aircraftListViewModel.aircraftList.observe(this@MapActivity, {
+            this.onAircraftListChange(map, it)
         })
         this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
             this.refreshAircraftList(map.boundingBox)
