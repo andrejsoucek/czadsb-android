@@ -35,7 +35,6 @@ class Authenticator constructor(
             val client = AuthenticationAPIClient(this.auth0)
             client
                 .renewAuth(refreshToken)
-                .addParameter("scope", "openid profile email offline_access")
                 .start(object : BaseCallback<Credentials, AuthenticationException> {
                     override fun onFailure(error: AuthenticationException) {
                         throw error

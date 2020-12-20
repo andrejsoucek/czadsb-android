@@ -5,9 +5,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import cz.adsb.czadsb.R
 import cz.adsb.czadsb.model.api.ImagesAPI
 import cz.adsb.czadsb.model.images.Image
 import cz.adsb.czadsb.model.planes.Aircraft
+import cz.adsb.czadsb.utils.Event
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
@@ -21,10 +23,10 @@ class AircraftInfoViewModel(application: Application) : AndroidViewModel(applica
 
     val image = MutableLiveData<Image?>()
 
-    val error: LiveData<String>
+    val error: LiveData<Event<String>>
         get() = this._error
 
-    private val _error = MutableLiveData<String>()
+    private val _error = MutableLiveData<Event<String>>()
 
     private val api = ImagesAPI("https://www.airport-data.com/api/ac_thumb.json") // @TODO DI
 
@@ -38,7 +40,11 @@ class AircraftInfoViewModel(application: Application) : AndroidViewModel(applica
                 try {
                     this@AircraftInfoViewModel.image.value = this@AircraftInfoViewModel.api.fetch(icao)
                 } catch (e: Exception) {
-                    this@AircraftInfoViewModel._error.value = e.message
+
+                    this@AircraftInfoViewModel._error.value = Event(
+                        e.message
+                            ?: getApplication<Application>().applicationContext.getString(R.string.error_during_loading_aircraft_image)
+                    )
                 }
             }
         }

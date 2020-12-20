@@ -16,12 +16,12 @@ import cz.adsb.czadsb.utils.Event
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
+    val userLoggedIn: LiveData<Event<Boolean>>
+        get() = this._userLoggedIn
+
     private val authenticator = Authenticator(application.applicationContext) //@TODO DI
 
     private val _userLoggedIn = MutableLiveData<Event<Boolean>>()
-
-    val userLoggedIn: LiveData<Event<Boolean>>
-        get() = this._userLoggedIn
 
     init {
         this._userLoggedIn.value = Event(this.authenticator.isUserLoggedIn())

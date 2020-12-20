@@ -9,17 +9,11 @@
     <string name="show_password">Zobrazit heslo</string>
     <string name="cancel">Zrušit</string>
     <string name="login_successful">Přihlášení proběhlo úspěšně.</string>
-    <string name="unexpected_error_while_logging_in">Neočekávaná chyba při přihlašování.</string>
     <string name="you_have_been_logged_out">Byl jste odhlášen.</string>
-    <string name="name_or_password_wrong">Nesprávné uživatelské jméno nebo heslo.</string>
-    <string name="could_not_login_client_error">Přihlášení se nezdařilo - chyba klienta.</string>
-    <string name="could_not_login_server_redirection_error">Přihlášení se nezdařilo - chyba přesměrování.</string>
-    <string name="could_not_login_server_error">Přihlášení se nezdařilo - chyba serveru.</string>
+    <string name="error_during_loading_aircraft_image">Chyba při načítání obrázku letadla.</string>
     <string name="altitude">Nadm. výška:</string>
     <string name="speed">Rychlost:</string>
     <string name="heading">Kurz:</string>
     <string name="squawk">Kód odpovídače:</string>
     <string name="unknown_aircraft">Neznámý typ letounu</string>
-    <string name="com_auth0_client_id">ITqkED4MFYkEDv9pzE4CW0Al7vTEqS0O</string>
-    <string name="com_auth0_domain">czadsb.eu.auth0.com</string>
 </resources>

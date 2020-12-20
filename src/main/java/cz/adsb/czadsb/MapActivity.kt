@@ -76,7 +76,6 @@ class MapActivity : AppCompatActivity() {
         this.observeAircraftInfo(bs)
         map.addOnFirstLayoutListener { _, _, _, _, _ ->
             this.observeAircraftList(map)
-            this.refreshAircraftList(map.boundingBox)
         }
     }
 
@@ -189,7 +188,7 @@ class MapActivity : AppCompatActivity() {
         this.aircraftInfoViewModel.image.observe(this@MapActivity, {
             this.onAircraftImageChange(it)
         })
-        this.aircraftInfoViewModel.error.observe(this@MapActivity, {
+        this.aircraftInfoViewModel.error.observeEvent(this@MapActivity, {
             Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
         })
     }
@@ -201,7 +200,7 @@ class MapActivity : AppCompatActivity() {
         this.aircraftListViewModel.event.observeEvent(this@MapActivity, {
             this.refreshAircraftList(map.boundingBox)
         })
-        this.aircraftListViewModel.error.observe(this@MapActivity, {
+        this.aircraftListViewModel.error.observeEvent(this@MapActivity, {
             if (it is AuthenticationException) {
                 this.userViewModel.performLogout(this@MapActivity)
                 Toast.makeText(applicationContext, R.string.you_have_been_logged_out, Toast.LENGTH_LONG).show()
@@ -222,16 +221,12 @@ class MapActivity : AppCompatActivity() {
     }
 
     private fun refreshAircraftList(bb: BoundingBox) {
-        try {
-            this@MapActivity.aircraftListViewModel.refreshAircraftList(
-                bb.latNorth,
-                bb.latSouth,
-                bb.lonWest,
-                bb.lonEast
-            )
-        } catch (e: Exception) {
-            Toast.makeText(applicationContext, e.message, Toast.LENGTH_LONG).show()
-        }
+        this@MapActivity.aircraftListViewModel.refreshAircraftList(
+            bb.latNorth,
+            bb.latSouth,
+            bb.lonWest,
+            bb.lonEast
+        )
     }
 
     private fun onSelectedAircraftChange(aircraft: Aircraft?) {

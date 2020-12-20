@@ -14,6 +14,8 @@ class PlanesAPI(
     private val url: String,
 ) {
 
+    private var refreshedToken = false
+
     suspend fun fetch(
         lastDv: String,
         north: Double,
@@ -40,7 +42,11 @@ class PlanesAPI(
             }
             is Result.Failure -> {
                 if (result.getException().response.statusCode == 401) {
-                    throw AuthenticationException()
+                    if (refreshedToken) {
+                        throw AuthenticationException()
+                    }
+                    this.authenticator.refresh()
+                    this.refreshedToken = true
                 }
                 throw result.getException()
             }
