@@ -33,7 +33,6 @@ class Authenticator constructor(
                 .renewAuth(refreshToken)
                 .start(object : BaseCallback<Credentials, AuthenticationException> {
                     override fun onFailure(error: AuthenticationException) {
-                        throw error
                     }
 
                     override fun onSuccess(payload: Credentials?) {
