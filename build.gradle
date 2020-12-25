@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.4.20'
+    ext.koin_version= "2.2.1"
     repositories {
         google()
         jcenter()
@@ -26,6 +27,7 @@ android {
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         manifestPlaceholders = [auth0Domain: "@string/com_auth0_domain", auth0Scheme: "demo"]
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -38,6 +40,7 @@ android {
         noStdlib = true
     }
 }
+
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
@@ -53,9 +56,14 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
     implementation 'com.auth0.android:auth0:1.29.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation "org.koin:koin-core:$koin_version"
+    implementation "org.koin:koin-androidx-scope:$koin_version"
+    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
+
 }
 repositories {
     mavenCentral()
     google()
+    jcenter()
     maven { url "https://jitpack.io" }
 }

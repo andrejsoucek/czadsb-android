@@ -1,16 +1,17 @@
-package cz.adsb.czadsb
+package cz.adsb.czadsb.view
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import cz.adsb.czadsb.R
 import cz.adsb.czadsb.utils.observeEvent
 import cz.adsb.czadsb.viewmodel.UserViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginActivity : AppCompatActivity() {
 
-    private val userViewModel by viewModels<UserViewModel>()
+    private val userViewModel by viewModel<UserViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -14,12 +14,8 @@ import cz.adsb.czadsb.utils.getProperty
 
 class Authenticator constructor(
     private val ctx: Context,
-    private val auth0: Auth0 = Auth0(ctx) // @TODO DI
+    private val auth0: Auth0
 ) {
-    init {
-        this.auth0.isOIDCConformant = true
-    }
-
     fun login(returnActivity: Activity, callback: AuthCallback) {
         WebAuthProvider
             .login(this.auth0)

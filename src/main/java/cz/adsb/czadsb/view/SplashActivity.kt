@@ -1,4 +1,4 @@
-package cz.adsb.czadsb
+package cz.adsb.czadsb.view
 
 import android.content.Intent
 import android.os.Bundle

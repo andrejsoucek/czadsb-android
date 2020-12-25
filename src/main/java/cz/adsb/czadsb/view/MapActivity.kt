@@ -1,4 +1,4 @@
-package cz.adsb.czadsb
+package cz.adsb.czadsb.view
 
 import android.Manifest
 import android.content.Intent
@@ -9,12 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.squareup.picasso.Picasso
+import cz.adsb.czadsb.BuildConfig
+import cz.adsb.czadsb.R
 import cz.adsb.czadsb.model.images.Image
 import cz.adsb.czadsb.model.planes.Aircraft
 import cz.adsb.czadsb.model.planes.AircraftList
@@ -29,6 +30,7 @@ import kotlinx.android.synthetic.main.aircraft_info.*
 import kotlinx.android.synthetic.main.aircraft_info_full.*
 import kotlinx.android.synthetic.main.aircraft_info_peek.*
 import kotlinx.android.synthetic.main.floating_menu.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -44,11 +46,11 @@ import java.util.*
 
 class MapActivity : AppCompatActivity() {
 
-    private val userViewModel by viewModels<UserViewModel>()
+    private val userViewModel by viewModel<UserViewModel>()
 
-    private val aircraftInfoViewModel by viewModels<AircraftInfoViewModel>()
+    private val aircraftInfoViewModel by viewModel<AircraftInfoViewModel>()
 
-    private val aircraftListViewModel by viewModels<AircraftListViewModel>()
+    private val aircraftListViewModel by viewModel<AircraftListViewModel>()
 
     private val markersOverlay = FolderOverlay()
 

@@ -17,7 +17,10 @@ import cz.adsb.czadsb.utils.getProperty
 import kotlinx.coroutines.launch
 import kotlin.concurrent.timer
 
-class AircraftListViewModel(application: Application) : AndroidViewModel(application) {
+class AircraftListViewModel(
+    application: Application,
+    private val api: PlanesAPI
+) : AndroidViewModel(application) {
 
     val event = MutableLiveData<Event<Unit>>()
 
@@ -38,11 +41,6 @@ class AircraftListViewModel(application: Application) : AndroidViewModel(applica
             this@AircraftListViewModel.event.value = Event(Unit)
         }
     }
-
-    private val api: PlanesAPI = PlanesAPI(
-        Authenticator(application.applicationContext, Auth0(application.applicationContext)),
-        application.applicationContext.getProperty("aircraftlist_url")
-    ) //@TODO DI
 
     fun refreshAircraftList(north: Double, south: Double, west: Double, east: Double) {
         viewModelScope.launch {

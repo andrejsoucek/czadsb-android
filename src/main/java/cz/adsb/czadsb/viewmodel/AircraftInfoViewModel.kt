@@ -13,7 +13,10 @@ import cz.adsb.czadsb.utils.Event
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
-class AircraftInfoViewModel(application: Application) : AndroidViewModel(application) {
+class AircraftInfoViewModel(
+    application: Application,
+    private val api: ImagesAPI,
+) : AndroidViewModel(application) {
 
     val state = MutableLiveData<State>()
 
@@ -27,8 +30,6 @@ class AircraftInfoViewModel(application: Application) : AndroidViewModel(applica
         get() = this._error
 
     private val _error = MutableLiveData<Event<String>>()
-
-    private val api = ImagesAPI("https://www.airport-data.com/api/ac_thumb.json") // @TODO DI
 
     init {
         this.state.value = State.HIDDEN

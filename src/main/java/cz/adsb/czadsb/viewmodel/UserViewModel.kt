@@ -14,12 +14,13 @@ import com.auth0.android.result.Credentials
 import cz.adsb.czadsb.model.user.Authenticator
 import cz.adsb.czadsb.utils.Event
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel(
+    application: Application,
+    private val authenticator: Authenticator,
+) : AndroidViewModel(application) {
 
     val userLoggedIn: LiveData<Event<Boolean>>
         get() = this._userLoggedIn
-
-    private val authenticator = Authenticator(application.applicationContext) //@TODO DI
 
     private val _userLoggedIn = MutableLiveData<Event<Boolean>>()
 
