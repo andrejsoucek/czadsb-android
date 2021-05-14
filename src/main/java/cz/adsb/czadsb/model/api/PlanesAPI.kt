@@ -7,7 +7,6 @@ import cz.adsb.czadsb.model.user.AuthenticationException
 import cz.adsb.czadsb.model.user.Authenticator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 
 class PlanesAPI(
     private val authenticator: Authenticator,
@@ -43,12 +42,15 @@ class PlanesAPI(
             is Result.Failure -> {
                 if (result.getException().response.statusCode == 401) {
                     if (refreshedToken) {
+                        refreshedToken = false
                         throw AuthenticationException()
                     }
                     this.authenticator.refresh()
                     this.refreshedToken = true
+                    return this.fetchFull(north, south, west, east)
+                } else {
+                    throw result.getException()
                 }
-                throw result.getException()
             }
         }
     }
