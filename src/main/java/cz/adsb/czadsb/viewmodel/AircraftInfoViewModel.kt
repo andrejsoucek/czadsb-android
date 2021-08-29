@@ -41,7 +41,6 @@ class AircraftInfoViewModel(
                 try {
                     this@AircraftInfoViewModel.image.value = this@AircraftInfoViewModel.api.fetch(icao)
                 } catch (e: Exception) {
-
                     this@AircraftInfoViewModel._error.value = Event(
                         e.message
                             ?: getApplication<Application>().applicationContext.getString(R.string.error_during_loading_aircraft_image)

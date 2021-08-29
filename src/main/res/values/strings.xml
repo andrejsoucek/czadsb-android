@@ -8,7 +8,7 @@
     <string name="password">Password</string>
     <string name="show_password">Show password</string>
     <string name="cancel">Cancel</string>
-    <string name="login_successful">Login successful.</string>
+    <string name="unexpected_error">Unexpected error.</string>
     <string name="you_have_been_logged_out">You have been logged out.</string>
     <string name="error_during_loading_aircraft_image">Error during loading aircraft image.</string>
     <string name="altitude">Altitude:</string>

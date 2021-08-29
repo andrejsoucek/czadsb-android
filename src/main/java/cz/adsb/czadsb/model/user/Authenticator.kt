@@ -73,7 +73,7 @@ class Authenticator constructor(
         return prefs.getString(PREFS_ACCESS_TOKEN, null)
     }
 
-    fun isUserLoggedIn(): Boolean = getAccessToken() != null
+    fun hasAccessToken(): Boolean = getAccessToken() != null
 
     private fun getRefreshToken(): String? {
         val prefs = this.ctx.getSharedPreferences(PREFS_ACCOUNT, Context.MODE_PRIVATE)

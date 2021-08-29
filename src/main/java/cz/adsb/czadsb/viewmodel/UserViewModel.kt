@@ -19,29 +19,29 @@ class UserViewModel(
     private val authenticator: Authenticator,
 ) : AndroidViewModel(application) {
 
-    val userLoggedIn: LiveData<Event<Boolean>>
-        get() = this._userLoggedIn
+    val hasAccessToken: LiveData<Event<Boolean>>
+        get() = this._hasAccessToken
 
-    private val _userLoggedIn = MutableLiveData<Event<Boolean>>()
+    private val _hasAccessToken = MutableLiveData<Event<Boolean>>()
 
     init {
-        this._userLoggedIn.value = Event(this.authenticator.isUserLoggedIn())
+        this._hasAccessToken.value = Event(this.authenticator.hasAccessToken())
     }
 
     fun performLogin(returnActivity: Activity) {
         this.authenticator.login(returnActivity, object : AuthCallback {
             override fun onFailure(dialog: Dialog) {
-                this@UserViewModel._userLoggedIn.postValue(Event(false))
+                this@UserViewModel._hasAccessToken.postValue(Event(false))
             }
 
             override fun onFailure(exception: AuthenticationException) {
-                this@UserViewModel._userLoggedIn.postValue(Event(false))
+                this@UserViewModel._hasAccessToken.postValue(Event(false))
                 // TODO do something
             }
 
             override fun onSuccess(credentials: Credentials) {
                 this@UserViewModel.authenticator.saveUserCredentials(credentials)
-                this@UserViewModel._userLoggedIn.postValue(Event(true))
+                this@UserViewModel._hasAccessToken.postValue(Event(true))
             }
         })
     }
@@ -50,11 +50,11 @@ class UserViewModel(
         this.authenticator.logout(returnActivity, object : VoidCallback {
             override fun onSuccess(payload: Void?) {
                 this@UserViewModel.authenticator.deleteUserCredentials()
-                this@UserViewModel._userLoggedIn.postValue(Event(false))
+                this@UserViewModel._hasAccessToken.postValue(Event(false))
             }
 
             override fun onFailure(error: Auth0Exception) {
-                this@UserViewModel._userLoggedIn.postValue(Event(true))
+                this@UserViewModel._hasAccessToken.postValue(Event(true))
                 // TODO Show error to user
             }
         })

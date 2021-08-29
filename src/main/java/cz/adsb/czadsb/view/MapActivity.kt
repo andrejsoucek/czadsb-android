@@ -205,15 +205,14 @@ class MapActivity : AppCompatActivity() {
         this.aircraftListViewModel.error.observeEvent(this@MapActivity, {
             if (it is AuthenticationException) {
                 this.userViewModel.performLogout(this@MapActivity)
-                Toast.makeText(applicationContext, R.string.you_have_been_logged_out, Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(applicationContext, it.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, R.string.unexpected_error, Toast.LENGTH_LONG).show()
             }
         })
     }
 
     private fun observeUser() {
-        this.userViewModel.userLoggedIn.observeEvent(this@MapActivity, {
+        this.userViewModel.hasAccessToken.observeEvent(this@MapActivity, {
             if (!it) {
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)

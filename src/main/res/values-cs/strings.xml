@@ -8,7 +8,7 @@
     <string name="password">Heslo</string>
     <string name="show_password">Zobrazit heslo</string>
     <string name="cancel">Zrušit</string>
-    <string name="login_successful">Přihlášení proběhlo úspěšně.</string>
+    <string name="unexpected_error">Neočekávaná chyba.</string>
     <string name="you_have_been_logged_out">Byl jste odhlášen.</string>
     <string name="error_during_loading_aircraft_image">Chyba při načítání obrázku letadla.</string>
     <string name="altitude">Nadm. výška:</string>
